@@ -1,108 +1,98 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Image from "next/image";
 import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SplitType from "split-type";
-import { images } from "@/lib/images";
 
-function Particles() {
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none z-[2]">
-      {Array.from({ length: 25 }).map((_, i) => (
-        <div
-          key={i}
-          className="particle"
-          style={{
-            left: `${Math.random() * 100}%`,
-            bottom: `-5%`,
-            width: `${1 + Math.random() * 2}px`,
-            height: `${1 + Math.random() * 2}px`,
-            background: `rgba(${139 + Math.random() * 50}, ${
-              92 + Math.random() * 40
-            }, 246, ${0.2 + Math.random() * 0.4})`,
-            animationDuration: `${8 + Math.random() * 15}s`,
-            animationDelay: `${Math.random() * 10}s`,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
+gsap.registerPlugin(ScrollTrigger);
 
 export default function Hero() {
+  const sectionRef = useRef<HTMLDivElement>(null);
   const line1Ref = useRef<HTMLHeadingElement>(null);
   const line2Ref = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLDivElement>(null);
-  const scrollIndicatorRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const sphereRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!line1Ref.current || !line2Ref.current) return;
+    if (!line1Ref.current || !line2Ref.current || !sectionRef.current) return;
 
     const split1 = new SplitType(line1Ref.current, { types: "chars" });
     const split2 = new SplitType(line2Ref.current, { types: "chars" });
 
-    const tl = gsap.timeline({ delay: 0.5 });
-
     gsap.set([split1.chars, split2.chars], { y: "110%", opacity: 0 });
     gsap.set(subtitleRef.current, { opacity: 0, y: 20 });
-    gsap.set(scrollIndicatorRef.current, { opacity: 0, y: 10 });
+    gsap.set(scrollRef.current, { opacity: 0, y: 10 });
+    gsap.set(sphereRef.current, { scale: 0.8, opacity: 0 });
 
-    tl.to(split1.chars, {
-      y: "0%",
+    const tl = gsap.timeline({ delay: 0.3 });
+
+    tl.to(sphereRef.current, {
+      scale: 1,
       opacity: 1,
-      duration: 1,
-      stagger: 0.03,
-      ease: "power3.out",
+      duration: 1.5,
+      ease: "power2.out",
     })
       .to(
+        split1.chars,
+        { y: "0%", opacity: 1, duration: 1, stagger: 0.03, ease: "power3.out" },
+        "-=1"
+      )
+      .to(
         split2.chars,
-        {
-          y: "0%",
-          opacity: 1,
-          duration: 1,
-          stagger: 0.03,
-          ease: "power3.out",
-        },
+        { y: "0%", opacity: 1, duration: 1, stagger: 0.03, ease: "power3.out" },
         "-=0.6"
       )
-      .to(
-        subtitleRef.current,
-        { opacity: 1, y: 0, duration: 1, ease: "power2.out" },
-        "-=0.4"
-      )
-      .to(
-        scrollIndicatorRef.current,
-        { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" },
-        "-=0.5"
-      );
+      .to(subtitleRef.current, { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" }, "-=0.4")
+      .to(scrollRef.current, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, "-=0.3");
+
+    // Parallax sphere on scroll
+    gsap.to(sphereRef.current, {
+      yPercent: 30,
+      scale: 1.1,
+      ease: "none",
+      scrollTrigger: {
+        trigger: sectionRef.current,
+        start: "top top",
+        end: "bottom top",
+        scrub: true,
+      },
+    });
 
     return () => {
       split1.revert();
       split2.revert();
+      ScrollTrigger.getAll().forEach((st) => st.kill());
     };
   }, []);
 
   return (
     <section
       id="hero"
+      ref={sectionRef}
       className="relative h-screen w-full flex items-center justify-center overflow-hidden"
+      style={{
+        background: "linear-gradient(180deg, #1a1a1a 0%, #111111 40%, #050505 100%)",
+      }}
     >
-      {/* Background image */}
-      <Image
-        src={images.heroBg}
-        alt=""
-        fill
-        className="object-cover scale-110"
-        priority
-        unoptimized
+      {/* Glowing sphere behind text */}
+      <div
+        ref={sphereRef}
+        className="absolute pointer-events-none"
+        style={{
+          width: "55vw",
+          height: "55vw",
+          maxWidth: "700px",
+          maxHeight: "700px",
+          borderRadius: "50%",
+          background:
+            "radial-gradient(circle, rgba(255,220,240,0.15) 0%, rgba(180,130,255,0.08) 30%, rgba(100,80,200,0.04) 55%, transparent 70%)",
+          filter: "blur(40px)",
+        }}
       />
-      <div className="absolute inset-0 bg-black/40" />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent" />
-      <div className="absolute inset-0 bg-gradient-to-b from-[#050505]/30 via-transparent to-transparent" />
 
-      <Particles />
-
+      {/* Content */}
       <div className="relative z-10 text-center">
         <div className="overflow-hidden">
           <h1
@@ -121,29 +111,22 @@ export default function Hero() {
           </h1>
         </div>
         <div ref={subtitleRef} className="mt-10">
-          <div className="w-16 h-[1px] mx-auto mb-5 bg-gradient-to-r from-transparent via-[#8b5cf6]/50 to-transparent" />
-          <p className="text-xs md:text-sm uppercase tracking-[0.4em] text-white/50">
+          <div className="w-16 h-[1px] mx-auto mb-5 bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+          <p className="text-xs md:text-sm uppercase tracking-[0.4em] text-white/40">
             Kreatywne studio cyfrowe · 2026
           </p>
         </div>
       </div>
 
+      {/* Scroll indicator */}
       <div
-        ref={scrollIndicatorRef}
+        ref={scrollRef}
         className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3"
       >
-        <span className="text-[10px] uppercase tracking-[0.3em] text-white/30">
+        <span className="text-[10px] uppercase tracking-[0.3em] text-white/25">
           Scroll
         </span>
-        <div className="w-[1px] h-10 relative overflow-hidden">
-          <div
-            className="absolute top-0 left-0 w-full bg-gradient-to-b from-[#8b5cf6]/60 to-transparent"
-            style={{
-              height: "100%",
-              animation: "floatUp 2.5s ease-in-out infinite",
-            }}
-          />
-        </div>
+        <div className="w-[1px] h-8 bg-gradient-to-b from-white/30 to-transparent" />
       </div>
     </section>
   );

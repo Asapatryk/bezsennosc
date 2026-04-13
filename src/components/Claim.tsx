@@ -14,77 +14,53 @@ const headlines = [
 
 export default function Claim() {
   const sectionRef = useRef<HTMLElement>(null);
-  const headlineRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const wrapperRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     if (!sectionRef.current) return;
 
-    const section = sectionRef.current;
-    const totalHeight = section.offsetHeight;
-    const segmentHeight = totalHeight / headlines.length;
+    const ctx = gsap.context(() => {
+      headlines.forEach((_, i) => {
+        const el = wrapperRefs.current[i];
+        if (!el) return;
 
-    headlineRefs.current.forEach((el, i) => {
-      if (!el) return;
+        // Each headline occupies 1/3 of the 300vh section
+        // Calculate start/end as percentages of scroll through section
+        const segStart = i / 3;
+        const segEnd = (i + 1) / 3;
 
-      const startPct = (i * segmentHeight) / totalHeight;
-      const endPct = ((i + 1) * segmentHeight) / totalHeight;
+        // Fade in
+        ScrollTrigger.create({
+          trigger: sectionRef.current,
+          start: `${segStart * 100}% bottom`,
+          end: `${(segStart + 0.07) * 100}% bottom`,
+          scrub: true,
+          animation: gsap.fromTo(el, { opacity: 0, y: 40 }, { opacity: 1, y: 0, ease: "power2.out" }),
+        });
 
-      // Fade in
-      gsap.fromTo(
-        el,
-        { opacity: 0, y: 40 },
-        {
-          opacity: 1,
-          y: 0,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: section,
-            start: `${startPct * 100}% bottom`,
-            end: `${(startPct + 0.08) * 100}% bottom`,
+        // Fade out (not for last)
+        if (i < headlines.length - 1) {
+          ScrollTrigger.create({
+            trigger: sectionRef.current,
+            start: `${(segEnd - 0.07) * 100}% bottom`,
+            end: `${segEnd * 100}% bottom`,
             scrub: true,
-          },
+            animation: gsap.fromTo(el, { opacity: 1, y: 0 }, { opacity: 0, y: -30, ease: "power2.in" }),
+          });
+        } else {
+          // Last one fades when leaving section
+          ScrollTrigger.create({
+            trigger: sectionRef.current,
+            start: "bottom 55%",
+            end: "bottom top",
+            scrub: true,
+            animation: gsap.fromTo(el, { opacity: 1 }, { opacity: 0, ease: "power2.in" }),
+          });
         }
-      );
+      });
+    }, sectionRef);
 
-      // Fade out (except last)
-      if (i < headlines.length - 1) {
-        gsap.fromTo(
-          el,
-          { opacity: 1, y: 0 },
-          {
-            opacity: 0,
-            y: -30,
-            ease: "power2.in",
-            scrollTrigger: {
-              trigger: section,
-              start: `${(endPct - 0.08) * 100}% bottom`,
-              end: `${endPct * 100}% bottom`,
-              scrub: true,
-            },
-          }
-        );
-      } else {
-        // Last headline fades out at end of section
-        gsap.fromTo(
-          el,
-          { opacity: 1 },
-          {
-            opacity: 0,
-            ease: "power2.in",
-            scrollTrigger: {
-              trigger: section,
-              start: "bottom 60%",
-              end: "bottom top",
-              scrub: true,
-            },
-          }
-        );
-      }
-    });
-
-    return () => {
-      ScrollTrigger.getAll().forEach((st) => st.kill());
-    };
+    return () => ctx.revert();
   }, []);
 
   return (
@@ -94,20 +70,18 @@ export default function Claim() {
       className="relative"
       style={{
         height: "300vh",
-        background: "linear-gradient(to bottom, #050505, #0a0510, #050505)",
+        background: "linear-gradient(180deg, #050505 0%, #0a0510 50%, #050505 100%)",
       }}
     >
       {headlines.map((h, i) => (
         <div
           key={i}
-          ref={(el) => {
-            headlineRefs.current[i] = el;
-          }}
-          className="fixed top-0 left-0 w-full h-screen flex items-center justify-center pointer-events-none z-10"
-          style={{ opacity: 0 }}
+          ref={(el) => { wrapperRefs.current[i] = el; }}
+          className="fixed inset-0 flex items-center justify-center pointer-events-none"
+          style={{ opacity: 0, zIndex: 10 }}
         >
           <h2
-            className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold uppercase tracking-wider text-center px-6"
+            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold uppercase tracking-wider text-center px-6"
             style={{ color: h.color }}
           >
             {h.text}

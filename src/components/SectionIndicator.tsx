@@ -10,19 +10,18 @@ const sections = [
   { id: "hero", num: "01" },
   { id: "claim", num: "02" },
   { id: "showcase", num: "03" },
-  { id: "approach", num: "04" },
-  { id: "navigation", num: "05" },
+  { id: "navigation", num: "04" },
 ];
 
 export default function SectionIndicator() {
   const [current, setCurrent] = useState("01");
 
   useEffect(() => {
-    sections.forEach(({ id, num }) => {
+    const triggers = sections.map(({ id, num }) => {
       const el = document.getElementById(id);
-      if (!el) return;
+      if (!el) return null;
 
-      ScrollTrigger.create({
+      return ScrollTrigger.create({
         trigger: el,
         start: "top center",
         end: "bottom center",
@@ -32,7 +31,7 @@ export default function SectionIndicator() {
     });
 
     return () => {
-      ScrollTrigger.getAll().forEach((st) => st.kill());
+      triggers.forEach((st) => st?.kill());
     };
   }, []);
 

@@ -18,39 +18,29 @@ export default function CTA() {
 
     const split = new SplitType(headingRef.current, { types: "words" });
 
-    gsap.set(split.words, { opacity: 0, y: 30 });
-    gsap.set(buttonRef.current, { opacity: 0, y: 20 });
-    gsap.set(emailRef.current, { opacity: 0, y: 15 });
+    const ctx = gsap.context(() => {
+      gsap.set(split.words, { opacity: 0, y: 30 });
+      gsap.set(buttonRef.current, { opacity: 0, y: 20 });
+      gsap.set(emailRef.current, { opacity: 0, y: 15 });
 
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: sectionRef.current,
-        start: "top 65%",
-        toggleActions: "play none none reverse",
-      },
-    });
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 65%",
+          toggleActions: "play none none reverse",
+        },
+      });
 
-    tl.to(split.words, {
-      opacity: 1,
-      y: 0,
-      duration: 0.8,
-      stagger: 0.06,
-      ease: "power2.out",
-    })
-      .to(
-        buttonRef.current,
-        { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" },
-        "-=0.3"
-      )
-      .to(
-        emailRef.current,
-        { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" },
-        "-=0.3"
-      );
+      tl.to(split.words, {
+        opacity: 1, y: 0, duration: 0.8, stagger: 0.06, ease: "power2.out",
+      })
+        .to(buttonRef.current, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, "-=0.3")
+        .to(emailRef.current, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, "-=0.3");
+    }, sectionRef);
 
     return () => {
       split.revert();
-      ScrollTrigger.getAll().forEach((st) => st.kill());
+      ctx.revert();
     };
   }, []);
 
@@ -73,9 +63,9 @@ export default function CTA() {
         <a
           ref={buttonRef}
           href="mailto:hello@studiobezsennosc.pl"
-          className="inline-block px-10 py-4 text-sm uppercase tracking-[0.25em] text-white border border-[#8b5cf6]/50 hover:border-[#8b5cf6] hover:shadow-[0_0_30px_rgba(139,92,246,0.2)] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] mb-8"
+          className="inline-block px-10 py-4 text-sm uppercase tracking-[0.25em] text-white border border-[#8b5cf6]/50 hover:border-[#8b5cf6] hover:shadow-[0_0_30px_rgba(139,92,246,0.2)] transition-all duration-700 mb-8"
         >
-          Skontaktuj się
+          Skontaktuj się →
         </a>
 
         <div>
