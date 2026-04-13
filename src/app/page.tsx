@@ -6,16 +6,42 @@ import Approach from "@/components/Approach";
 import Navigation from "@/components/Navigation";
 import Marquee from "@/components/Marquee";
 import Footer from "@/components/Footer";
+import SectionSeparator from "@/components/SectionSeparator";
+import SectionIndicator from "@/components/SectionIndicator";
 
 export default function Home() {
   return (
     <main>
       <Navbar />
+      <SectionIndicator />
       <Hero />
+      <SectionSeparator
+        fromColor="#050505"
+        toColor="#0d0518"
+        showDots
+      />
       <Claim />
+      <SectionSeparator
+        fromColor="#050510"
+        toColor="#050505"
+        showDots
+      />
       <Showcase />
+      <SectionSeparator
+        fromColor="#0a0515"
+        toColor="#050505"
+      />
       <Approach />
+      <SectionSeparator
+        fromColor="#050505"
+        toColor="#0a0518"
+        showDots
+      />
       <Navigation />
+      <SectionSeparator
+        fromColor="#080515"
+        toColor="#050505"
+      />
       <Marquee />
       <Footer />
     </main>

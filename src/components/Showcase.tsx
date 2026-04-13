@@ -32,6 +32,7 @@ const items = [
 export default function Showcase() {
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
+  const bgTextRef = useRef<HTMLDivElement>(null);
   const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
@@ -54,6 +55,20 @@ export default function Showcase() {
       },
     });
 
+    // Background text parallax — moves slower
+    if (bgTextRef.current) {
+      gsap.to(bgTextRef.current, {
+        x: -scrollWidth * 0.3,
+        ease: "none",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top top",
+          end: () => `+=${scrollWidth}`,
+          scrub: true,
+        },
+      });
+    }
+
     // Clip-path reveal for each image
     imageRefs.current.forEach((img) => {
       if (!img) return;
@@ -67,8 +82,8 @@ export default function Showcase() {
           scrollTrigger: {
             trigger: img,
             containerAnimation: scrollTween,
-            start: "left 80%",
-            end: "left 30%",
+            start: "left 85%",
+            end: "left 40%",
             scrub: true,
           },
         }
@@ -82,10 +97,24 @@ export default function Showcase() {
 
   return (
     <section
+      id="showcase"
       ref={sectionRef}
       className="relative overflow-hidden"
-      style={{ background: "#050505" }}
+      style={{
+        background:
+          "linear-gradient(135deg, #050505 0%, #0d0518 30%, #050510 60%, #0a0515 100%)",
+      }}
     >
+      {/* Giant background text */}
+      <div
+        ref={bgTextRef}
+        className="absolute top-1/2 -translate-y-1/2 left-0 whitespace-nowrap pointer-events-none z-0 select-none"
+      >
+        <span className="text-[20vw] font-bold uppercase text-white/[0.03] leading-none">
+          BEZSENNOŚĆ
+        </span>
+      </div>
+
       {/* Vertical label */}
       <div className="absolute left-6 md:left-12 top-1/2 -translate-y-1/2 z-10">
         <span
@@ -102,29 +131,27 @@ export default function Showcase() {
       {/* Horizontal track */}
       <div
         ref={trackRef}
-        className="flex items-center gap-16 md:gap-24 pl-24 md:pl-40 pr-20 h-screen"
+        className="flex items-center gap-16 md:gap-24 pl-24 md:pl-40 pr-20 h-screen relative z-[1]"
       >
         {items.map((item, i) => (
           <div
             key={i}
-            className="flex-shrink-0 w-[70vw] md:w-[45vw] lg:w-[35vw]"
+            className="flex-shrink-0 w-[75vw] md:w-[45vw] lg:w-[35vw]"
           >
             <div
               ref={(el) => {
                 imageRefs.current[i] = el;
               }}
-              className="relative w-full aspect-[4/3] bg-cover bg-center mb-6"
+              className="relative w-full aspect-[4/3] bg-cover bg-center mb-6 overflow-hidden"
               style={{ backgroundImage: `url(${item.image})` }}
             >
-              {/* Dark gradient overlay on image */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/60 to-transparent" />
+              {/* Gradient overlay on image */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/70 via-transparent to-[#050505]/20" />
             </div>
             <h3 className="text-2xl md:text-3xl font-bold uppercase tracking-wider text-white mb-2">
               {item.title}
             </h3>
-            <p className="text-sm text-[#666] tracking-wider">
-              {item.desc}
-            </p>
+            <p className="text-sm text-[#666] tracking-wider">{item.desc}</p>
           </div>
         ))}
       </div>

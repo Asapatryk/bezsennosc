@@ -31,17 +31,20 @@ export default function Approach() {
       }
     );
 
-    // Parallax on image
-    gsap.to(imageRef.current.querySelector("img, .img-inner"), {
-      yPercent: -15,
-      ease: "none",
-      scrollTrigger: {
-        trigger: sectionRef.current,
-        start: "top bottom",
-        end: "bottom top",
-        scrub: true,
-      },
-    });
+    // Parallax on image inner
+    const imgInner = imageRef.current.querySelector(".img-inner");
+    if (imgInner) {
+      gsap.to(imgInner, {
+        yPercent: -15,
+        ease: "none",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: true,
+        },
+      });
+    }
 
     // Text enter from right
     const textChildren = textRef.current.children;
@@ -70,25 +73,31 @@ export default function Approach() {
 
   return (
     <section
+      id="approach"
       ref={sectionRef}
-      className="min-h-screen flex items-center px-6 md:px-12 py-24 md:py-0"
-      style={{ background: "#050505" }}
+      className="relative min-h-screen flex items-center overflow-hidden"
     >
-      <div className="w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center">
+      {/* Full background image with overlay */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url(/images/studio.jpg)" }}
+      />
+      <div className="absolute inset-0 bg-black/70" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#050505]/50 via-transparent to-[#050505]/80" />
+
+      <div className="relative z-10 w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center px-6 md:px-12 py-24 md:py-0">
         {/* Image */}
-        <div
-          ref={imageRef}
-          className="relative aspect-[4/5] overflow-hidden"
-        >
+        <div ref={imageRef} className="relative aspect-[4/5] overflow-hidden">
           <div
             className="img-inner absolute inset-0 bg-cover bg-center scale-110"
             style={{ backgroundImage: "url(/images/studio.jpg)" }}
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/40 to-transparent" />
         </div>
 
         {/* Text */}
         <div ref={textRef}>
-          <span className="text-xs uppercase tracking-[0.3em] text-[#666] block mb-6">
+          <span className="text-xs uppercase tracking-[0.3em] text-[#8b5cf6]/60 block mb-6">
             Podejście
           </span>
           <h2 className="text-3xl sm:text-4xl md:text-4xl lg:text-5xl font-light text-white leading-snug mb-8">

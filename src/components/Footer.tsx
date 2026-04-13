@@ -2,12 +2,9 @@
 
 export default function Footer() {
   return (
-    <footer className="px-6 md:px-12 pt-20 pb-10" style={{ background: "#0a0a0a" }}>
-      {/* Top line */}
-      <div
-        className="border-t mb-16"
-        style={{ borderColor: "rgba(255,255,255,0.08)" }}
-      />
+    <footer className="relative px-6 md:px-12 pt-20 pb-10" style={{ background: "#0a0a0a" }}>
+      {/* Top gradient line */}
+      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#8b5cf6]/20 to-transparent" />
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 mb-20">
         {/* Logo */}
@@ -22,13 +19,13 @@ export default function Footer() {
         <div>
           <a
             href="mailto:hello@studiobezsennosc.pl"
-            className="block text-sm text-[#999] hover:text-white transition-colors duration-300 mb-2"
+            className="block text-sm text-[#999] hover:text-[#8b5cf6] transition-colors duration-500 mb-2"
           >
             hello@studiobezsennosc.pl
           </a>
           <a
             href="tel:+48000000000"
-            className="block text-sm text-[#999] hover:text-white transition-colors duration-300"
+            className="block text-sm text-[#999] hover:text-[#8b5cf6] transition-colors duration-500"
           >
             +48 000 000 000
           </a>
@@ -40,7 +37,7 @@ export default function Footer() {
             <a
               key={social}
               href="#"
-              className="text-sm text-[#999] hover:text-[#8b5cf6] transition-colors duration-300"
+              className="text-sm text-[#999] hover:text-[#8b5cf6] transition-colors duration-500"
             >
               {social}
             </a>
@@ -49,10 +46,8 @@ export default function Footer() {
       </div>
 
       {/* Bottom */}
-      <div
-        className="border-t pt-8 text-center"
-        style={{ borderColor: "rgba(255,255,255,0.06)" }}
-      >
+      <div className="relative pt-8 text-center">
+        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
         <p className="text-xs text-[#666] tracking-wider">
           © 2026 Studio Bezsenność · Wszystkie prawa zastrzeżone
         </p>
