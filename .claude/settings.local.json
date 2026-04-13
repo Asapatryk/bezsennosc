@@ -4,7 +4,15 @@
       "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --turbopack --import-alias \"@/*\" --yes)",
       "Bash(npm install:*)",
       "Bash(git add:*)",
-      "Bash(git commit -m ':*)"
+      "Bash(git commit -m ':*)",
+      "Bash(git remote:*)",
+      "Bash(git branch:*)",
+      "Bash(git push:*)",
+      "Bash(npm uninstall:*)",
+      "mcp__nano-banana__generate_image",
+      "Bash(mkdir -p src/components)",
+      "Bash(node -e ':*)",
+      "Bash(npx next:*)"
     ]
   }
 }
