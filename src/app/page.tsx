@@ -4,6 +4,7 @@ import Claim from "@/components/Claim";
 import Showcase from "@/components/Showcase";
 import Approach from "@/components/Approach";
 import Navigation from "@/components/Navigation";
+import CTA from "@/components/CTA";
 import Marquee from "@/components/Marquee";
 import Footer from "@/components/Footer";
 import SectionSeparator from "@/components/SectionSeparator";
@@ -15,33 +16,17 @@ export default function Home() {
       <Navbar />
       <SectionIndicator />
       <Hero />
-      <SectionSeparator
-        fromColor="#050505"
-        toColor="#0d0518"
-        showDots
-      />
+      <SectionSeparator fromColor="#050505" toColor="#050505" showDots />
       <Claim />
-      <SectionSeparator
-        fromColor="#050510"
-        toColor="#050505"
-        showDots
-      />
+      <SectionSeparator fromColor="#050505" toColor="#0d0518" showDots />
       <Showcase />
-      <SectionSeparator
-        fromColor="#0a0515"
-        toColor="#050505"
-      />
+      <SectionSeparator fromColor="#0d0518" toColor="#050505" />
       <Approach />
-      <SectionSeparator
-        fromColor="#050505"
-        toColor="#0a0518"
-        showDots
-      />
+      <SectionSeparator fromColor="#050505" toColor="#050505" showDots />
       <Navigation />
-      <SectionSeparator
-        fromColor="#080515"
-        toColor="#050505"
-      />
+      <SectionSeparator fromColor="#050505" toColor="#050505" />
+      <CTA />
+      <SectionSeparator fromColor="#0a0518" toColor="#050505" />
       <Marquee />
       <Footer />
     </main>

@@ -1,20 +1,41 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { images } from "@/lib/images";
 
 gsap.registerPlugin(ScrollTrigger);
 
 const links = [
-  { title: "O nas", desc: "Poznaj nas", href: "#", image: "/images/studio.jpg" },
-  { title: "Usługi", desc: "Zobacz co robimy", href: "#", image: "/images/work1.jpg" },
-  { title: "Kontakt", desc: "Napisz do nas", href: "#", image: "/images/texture.jpg" },
+  {
+    num: "01",
+    title: "O nas",
+    desc: "Poznaj zespół który nie śpi. Nasza historia, wartości i podejście do każdego projektu.",
+    href: "#",
+    image: images.studio,
+  },
+  {
+    num: "02",
+    title: "Usługi",
+    desc: "Strony, marketing, AI i branding. Wszystko czego potrzebujesz pod jednym dachem.",
+    href: "#",
+    image: images.work1,
+  },
+  {
+    num: "03",
+    title: "Kontakt",
+    desc: "Napisz o każdej porze — nie śpimy. Odpowiadamy szybciej niż myślisz.",
+    href: "#",
+    image: images.texture,
+  },
 ];
 
 export default function Navigation() {
   const sectionRef = useRef<HTMLElement>(null);
   const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   useEffect(() => {
     if (!sectionRef.current) return;
@@ -23,12 +44,11 @@ export default function Navigation() {
       if (!item) return;
       gsap.fromTo(
         item,
-        { opacity: 0, y: 40 },
+        { opacity: 0, y: 50 },
         {
           opacity: 1,
           y: 0,
-          duration: 0.8,
-          delay: i * 0.1,
+          duration: 1,
           ease: "power2.out",
           scrollTrigger: {
             trigger: item,
@@ -48,10 +68,10 @@ export default function Navigation() {
     <section
       id="navigation"
       ref={sectionRef}
-      className="relative py-24 md:py-32 px-6 md:px-12 animated-gradient overflow-hidden"
+      className="relative py-24 md:py-32 px-6 md:px-12 overflow-hidden"
       style={{
         background:
-          "linear-gradient(135deg, #050505 0%, #0a0518 30%, #050510 60%, #080515 100%)",
+          "linear-gradient(180deg, #050505 0%, #0a0515 50%, #050505 100%)",
       }}
     >
       <div className="max-w-7xl mx-auto relative z-10">
@@ -62,28 +82,53 @@ export default function Navigation() {
               itemRefs.current[i] = el;
             }}
             href={link.href}
-            className="group relative block border-t py-10 md:py-14 transition-all duration-700"
-            style={{ borderColor: "rgba(255,255,255,0.08)" }}
+            className="group relative block py-10 md:py-16 transition-all duration-700"
+            style={{
+              borderTop: "1px solid",
+              borderImage:
+                "linear-gradient(90deg, rgba(139,92,246,0.15), rgba(139,92,246,0.05), transparent) 1",
+            }}
+            onMouseEnter={() => setHoveredIdx(i)}
+            onMouseLeave={() => setHoveredIdx(null)}
           >
-            <div className="flex items-center justify-between">
-              <span className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-light text-white transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-5 text-outline-hover">
-                {link.title}{" "}
-                <span className="inline-block transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-4">
-                  →
-                </span>
-              </span>
+            {/* Hover background */}
+            <div
+              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
+              style={{ background: "rgba(139,92,246,0.03)" }}
+            />
 
-              <div className="flex items-center gap-8">
-                {/* Hover image thumbnail */}
-                <div className="hidden lg:block w-0 group-hover:w-32 h-20 overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]">
-                  <div
-                    className="w-32 h-20 bg-cover bg-center opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                    style={{ backgroundImage: `url(${link.image})` }}
-                  />
+            <div className="relative flex items-center justify-between gap-8">
+              {/* Left: number + title */}
+              <div className="flex items-baseline gap-4 md:gap-8">
+                <span className="text-xs md:text-sm text-[#8b5cf6]/40 tracking-[0.2em] font-light">
+                  {link.num}
+                </span>
+                <span className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-white transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-4">
+                  {link.title}
+                </span>
+              </div>
+
+              {/* Right: desc + image + arrow */}
+              <div className="flex items-center gap-6 md:gap-10">
+                {/* Hover image */}
+                <div className="hidden lg:block relative overflow-hidden w-0 h-0 group-hover:w-28 group-hover:h-20 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]">
+                  {hoveredIdx === i && (
+                    <Image
+                      src={link.image}
+                      alt=""
+                      fill
+                      className="object-cover"
+                      unoptimized
+                    />
+                  )}
                 </div>
 
-                <span className="hidden md:block text-sm text-[#666] tracking-wider transition-colors duration-500 group-hover:text-[#8b5cf6]/60">
+                <span className="hidden md:block text-sm text-[#666] max-w-[200px] leading-relaxed transition-colors duration-500 group-hover:text-[#999]">
                   {link.desc}
+                </span>
+
+                <span className="text-2xl md:text-3xl text-white/30 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:text-[#8b5cf6] group-hover:translate-x-2">
+                  →
                 </span>
               </div>
             </div>
@@ -91,8 +136,11 @@ export default function Navigation() {
         ))}
         {/* Bottom border */}
         <div
-          className="border-t"
-          style={{ borderColor: "rgba(255,255,255,0.08)" }}
+          style={{
+            height: "1px",
+            background:
+              "linear-gradient(90deg, rgba(139,92,246,0.15), rgba(139,92,246,0.05), transparent)",
+          }}
         />
       </div>
     </section>

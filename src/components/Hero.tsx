@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Image from "next/image";
 import { gsap } from "gsap";
 import SplitType from "split-type";
+import { images } from "@/lib/images";
 
 function Particles() {
   return (
@@ -42,10 +44,7 @@ export default function Hero() {
 
     const tl = gsap.timeline({ delay: 0.5 });
 
-    gsap.set([split1.chars, split2.chars], {
-      y: "110%",
-      opacity: 0,
-    });
+    gsap.set([split1.chars, split2.chars], { y: "110%", opacity: 0 });
     gsap.set(subtitleRef.current, { opacity: 0, y: 20 });
     gsap.set(scrollIndicatorRef.current, { opacity: 0, y: 10 });
 
@@ -69,22 +68,12 @@ export default function Hero() {
       )
       .to(
         subtitleRef.current,
-        {
-          opacity: 1,
-          y: 0,
-          duration: 1,
-          ease: "power2.out",
-        },
+        { opacity: 1, y: 0, duration: 1, ease: "power2.out" },
         "-=0.4"
       )
       .to(
         scrollIndicatorRef.current,
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-          ease: "power2.out",
-        },
+        { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" },
         "-=0.5"
       );
 
@@ -100,19 +89,20 @@ export default function Hero() {
       className="relative h-screen w-full flex items-center justify-center overflow-hidden"
     >
       {/* Background image */}
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-110"
-        style={{ backgroundImage: "url(/images/hero-bg.jpg)" }}
+      <Image
+        src={images.heroBg}
+        alt=""
+        fill
+        className="object-cover scale-110"
+        priority
+        unoptimized
       />
-      {/* Gradient overlays */}
       <div className="absolute inset-0 bg-black/40" />
       <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-b from-[#050505]/30 via-transparent to-transparent" />
 
-      {/* Particles */}
       <Particles />
 
-      {/* Content */}
       <div className="relative z-10 text-center">
         <div className="overflow-hidden">
           <h1
@@ -130,8 +120,6 @@ export default function Hero() {
             Bezsenność
           </h1>
         </div>
-
-        {/* Subtitle */}
         <div ref={subtitleRef} className="mt-10">
           <div className="w-16 h-[1px] mx-auto mb-5 bg-gradient-to-r from-transparent via-[#8b5cf6]/50 to-transparent" />
           <p className="text-xs md:text-sm uppercase tracking-[0.4em] text-white/50">
@@ -140,7 +128,6 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Scroll indicator */}
       <div
         ref={scrollIndicatorRef}
         className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3"

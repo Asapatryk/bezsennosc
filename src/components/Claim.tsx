@@ -3,40 +3,86 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import SplitType from "split-type";
 
 gsap.registerPlugin(ScrollTrigger);
 
+const headlines = [
+  { text: "Nie śpimy.", color: "#ffffff" },
+  { text: "Tworzymy.", color: "#ffffff" },
+  { text: "Hipnotyzujemy.", color: "#8b5cf6" },
+];
+
 export default function Claim() {
   const sectionRef = useRef<HTMLElement>(null);
-  const textRef = useRef<HTMLParagraphElement>(null);
+  const headlineRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
-    if (!textRef.current || !sectionRef.current) return;
+    if (!sectionRef.current) return;
 
-    const split = new SplitType(textRef.current, { types: "words" });
+    const section = sectionRef.current;
+    const totalHeight = section.offsetHeight;
+    const segmentHeight = totalHeight / headlines.length;
 
-    gsap.set(split.words, {
-      opacity: 0,
-      y: 30,
-    });
+    headlineRefs.current.forEach((el, i) => {
+      if (!el) return;
 
-    gsap.to(split.words, {
-      opacity: 1,
-      y: 0,
-      duration: 0.8,
-      stagger: 0.05,
-      ease: "power2.out",
-      scrollTrigger: {
-        trigger: sectionRef.current,
-        start: "top 60%",
-        end: "bottom 40%",
-        toggleActions: "play none none reverse",
-      },
+      const startPct = (i * segmentHeight) / totalHeight;
+      const endPct = ((i + 1) * segmentHeight) / totalHeight;
+
+      // Fade in
+      gsap.fromTo(
+        el,
+        { opacity: 0, y: 40 },
+        {
+          opacity: 1,
+          y: 0,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: section,
+            start: `${startPct * 100}% bottom`,
+            end: `${(startPct + 0.08) * 100}% bottom`,
+            scrub: true,
+          },
+        }
+      );
+
+      // Fade out (except last)
+      if (i < headlines.length - 1) {
+        gsap.fromTo(
+          el,
+          { opacity: 1, y: 0 },
+          {
+            opacity: 0,
+            y: -30,
+            ease: "power2.in",
+            scrollTrigger: {
+              trigger: section,
+              start: `${(endPct - 0.08) * 100}% bottom`,
+              end: `${endPct * 100}% bottom`,
+              scrub: true,
+            },
+          }
+        );
+      } else {
+        // Last headline fades out at end of section
+        gsap.fromTo(
+          el,
+          { opacity: 1 },
+          {
+            opacity: 0,
+            ease: "power2.in",
+            scrollTrigger: {
+              trigger: section,
+              start: "bottom 60%",
+              end: "bottom top",
+              scrub: true,
+            },
+          }
+        );
+      }
     });
 
     return () => {
-      split.revert();
       ScrollTrigger.getAll().forEach((st) => st.kill());
     };
   }, []);
@@ -45,24 +91,29 @@ export default function Claim() {
     <section
       id="claim"
       ref={sectionRef}
-      className="relative min-h-screen flex items-center justify-center px-6 md:px-12 overflow-hidden noise-overlay animated-gradient"
+      className="relative"
       style={{
-        background:
-          "linear-gradient(135deg, #050505 0%, #0d0518 25%, #050510 50%, #0a0520 75%, #050505 100%)",
+        height: "300vh",
+        background: "linear-gradient(to bottom, #050505, #0a0510, #050505)",
       }}
     >
-      <div className="relative z-10 max-w-[900px] mx-auto text-center">
-        <p
-          ref={textRef}
-          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light leading-relaxed text-white"
+      {headlines.map((h, i) => (
+        <div
+          key={i}
+          ref={(el) => {
+            headlineRefs.current[i] = el;
+          }}
+          className="fixed top-0 left-0 w-full h-screen flex items-center justify-center pointer-events-none z-10"
+          style={{ opacity: 0 }}
         >
-          Tworzymy cyfrowe doświadczenia które{" "}
-          <em className="text-[#8b5cf6] font-normal not-italic italic">
-            hipnotyzują
-          </em>
-          , konwertują i zostają w głowie.
-        </p>
-      </div>
+          <h2
+            className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold uppercase tracking-wider text-center px-6"
+            style={{ color: h.color }}
+          >
+            {h.text}
+          </h2>
+        </div>
+      ))}
     </section>
   );
 }
