@@ -20,23 +20,26 @@ const items = [
     title: "Marketing Meta",
     desc: "Facebook & Instagram Ads z realnym ROI.",
     top: "55%",
-    offsetX: 560,
+    offsetX: 800,
   },
   {
     image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80",
     title: "Automatyzacja AI",
     desc: "Chatboty i systemy oszczędzające czas.",
     top: "35%",
-    offsetX: 1140,
+    offsetX: 1600,
   },
   {
     image: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&q=80",
     title: "Branding",
     desc: "Tożsamość wizualna która zostaje w pamięci.",
     top: "10%",
-    offsetX: 1720,
+    offsetX: 2400,
   },
 ];
+
+// Ostatnie zdjęcie: offset 2400 + szer. 300 = 2700, potem 800 ogona
+const TRACK_EXTRA_PX = 2400 + 300 + 800;
 
 export default function Showcase() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -49,22 +52,31 @@ export default function Showcase() {
 
     const ctx = gsap.context(() => {
       const track = trackRef.current!;
-      const scrollWidth = track.scrollWidth - window.innerWidth;
+      const trackScrollDistance = track.scrollWidth - window.innerWidth;
+
+      // Zmierz szerokość napisu BEZSENNOŚĆ, żeby obliczyć pełny reveal
+      const textEl = bgTextRef.current?.firstElementChild as HTMLElement | null;
+      const textWidth = textEl ? textEl.getBoundingClientRect().width : 0;
+      // Przesunięcie tak, żeby ostatnia litera mogła być widoczna na lewym brzegu viewportu
+      const textRevealDistance = Math.max(0, textWidth - window.innerWidth * 0.3);
+
+      // Długość scrolla = pełny reveal napisu + 2000px oddechu po ostatniej literze
+      const scrollEnd = textRevealDistance + 2000;
 
       const scrollTween = gsap.to(track, {
-        x: -scrollWidth,
+        x: -trackScrollDistance,
         ease: "none",
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top top",
-          end: "+=8000",
+          end: `+=${scrollEnd}`,
           scrub: true,
           pin: true,
           anticipatePin: 1,
         },
       });
 
-      // Background color transition on section entry
+      // Tło: płynne przejście z #050505 na #0d0518 przy wjeździe
       gsap.fromTo(
         sectionRef.current,
         { backgroundColor: "#050505" },
@@ -80,24 +92,21 @@ export default function Showcase() {
         }
       );
 
-      // Background giant text — reveal reszta napisu podczas scrollowania
-      if (bgTextRef.current) {
-        const textEl = bgTextRef.current.firstElementChild as HTMLElement | null;
-        const textWidth = textEl ? textEl.getBoundingClientRect().width : 0;
-        const revealDistance = Math.max(0, textWidth - window.innerWidth * 0.6);
+      // Parallax napisu — kończy się przed końcem pinu (2000px oddechu)
+      if (bgTextRef.current && textRevealDistance > 0) {
         gsap.to(bgTextRef.current, {
-          x: -revealDistance,
+          x: -textRevealDistance,
           ease: "none",
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top top",
-            end: "+=8000",
+            end: `+=${textRevealDistance}`,
             scrub: true,
           },
         });
       }
 
-      // Fade-in reveal for each image+caption
+      // Fade-in dla każdego zdjęcia w horizontal scroll
       itemRefs.current.forEach((el) => {
         if (!el) return;
         gsap.fromTo(
@@ -122,8 +131,6 @@ export default function Showcase() {
     return () => ctx.revert();
   }, []);
 
-  const trackExtraPx = 1720 + 300 + 600; // last offset + image width + tail padding
-
   return (
     <section
       id="showcase"
@@ -131,18 +138,23 @@ export default function Showcase() {
       className="relative overflow-hidden"
       style={{ backgroundColor: "#050505" }}
     >
-      {/* Giant asymmetric background text */}
+      {/* OGROMNY napis w tle — min 300vw, bez overflow-hidden na kontenerze */}
       <div
         ref={bgTextRef}
         className="absolute top-0 left-0 h-screen flex items-center whitespace-nowrap pointer-events-none z-0 select-none"
-        style={{ paddingLeft: "8vw" }}
+        style={{
+          paddingLeft: "8vw",
+          paddingRight: "8vw",
+          minWidth: "320vw",
+          overflow: "visible",
+        }}
       >
         <span
           className="font-black uppercase leading-none"
           style={{
-            fontSize: "45vw",
+            fontSize: "30vw",
             color: "rgba(255,255,255,0.04)",
-            transform: "rotate(-2deg) translateY(2vw)",
+            transform: "rotate(-2deg) translateY(1.5vw)",
             transformOrigin: "left center",
             letterSpacing: "-0.03em",
             display: "inline-block",
@@ -152,7 +164,7 @@ export default function Showcase() {
         </span>
       </div>
 
-      {/* Vertical label */}
+      {/* Pionowa etykieta */}
       <div className="absolute left-6 md:left-12 top-1/2 -translate-y-1/2 z-10">
         <span
           className="text-xs uppercase tracking-[0.3em] text-[#8b5cf6]/40 block"
@@ -162,11 +174,11 @@ export default function Showcase() {
         </span>
       </div>
 
-      {/* Horizontal track — absolute positioning for asymmetric layout */}
+      {/* Horizontal track — absolute positioning dla asymetrycznego layoutu */}
       <div
         ref={trackRef}
         className="relative h-screen z-[1]"
-        style={{ width: `calc(15vw + ${trackExtraPx}px)` }}
+        style={{ width: `calc(15vw + ${TRACK_EXTRA_PX}px)` }}
       >
         {items.map((item, i) => (
           <div
