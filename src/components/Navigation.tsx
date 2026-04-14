@@ -33,29 +33,58 @@ const links = [
 
 export default function Navigation() {
   const sectionRef = useRef<HTMLElement>(null);
-  const blockRefs = useRef<(HTMLAnchorElement | null)[]>([]);
-  const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const rowRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const imageWrapRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const titleRefs = useRef<(HTMLHeadingElement | null)[]>([]);
+  const rightRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     if (!sectionRef.current) return;
 
     const ctx = gsap.context(() => {
-      imageRefs.current.forEach((img) => {
-        if (!img) return;
-        gsap.fromTo(
-          img,
-          { clipPath: "inset(100% 0 0 0)" },
-          {
-            clipPath: "inset(0% 0 0 0)",
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: img,
-              start: "top 85%",
-              end: "top 30%",
-              scrub: 1,
+      // Wejście: każdy wiersz fade in z translateY 30px, stagger 0.15s
+      gsap.from(rowRefs.current, {
+        opacity: 0,
+        y: 30,
+        ease: "power3.out",
+        duration: 1,
+        stagger: 0.15,
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 75%",
+        },
+      });
+
+      // Hover — reveal zdjęcia z clip-path
+      rowRefs.current.forEach((row, i) => {
+        if (!row) return;
+        const img = imageWrapRefs.current[i];
+        const title = titleRefs.current[i];
+        const right = rightRefs.current[i];
+
+        const tl = gsap.timeline({ paused: true });
+        if (img) {
+          tl.fromTo(
+            img,
+            { clipPath: "inset(50% 50% 50% 50%)", opacity: 0 },
+            {
+              clipPath: "inset(0% 0% 0% 0%)",
+              opacity: 0.4,
+              duration: 0.8,
+              ease: "power3.out",
             },
-          }
-        );
+            0
+          );
+        }
+        if (title) {
+          tl.to(title, { x: 10, color: "#ffffff", duration: 0.5, ease: "power2.out" }, 0);
+        }
+        if (right) {
+          tl.to(right, { x: -10, color: "#ffffff", duration: 0.5, ease: "power2.out" }, 0);
+        }
+
+        row.addEventListener("mouseenter", () => tl.play());
+        row.addEventListener("mouseleave", () => tl.reverse());
       });
     }, sectionRef);
 
@@ -66,55 +95,60 @@ export default function Navigation() {
     <section
       id="navigation"
       ref={sectionRef}
-      className="relative"
+      className="relative w-full h-screen flex flex-col"
       style={{ background: "#050505" }}
     >
       {links.map((link, i) => (
         <a
           key={i}
-          ref={(el) => {
-            blockRefs.current[i] = el;
-          }}
+          ref={(el) => { rowRefs.current[i] = el; }}
           href={link.href}
-          className="group relative block h-screen w-full overflow-hidden"
+          className="group relative flex-1 w-full overflow-hidden flex items-center"
+          style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}
         >
-          {/* Image background with clip-path reveal */}
+          {/* Zdjęcie tła — reveal na hover */}
           <div
-            ref={(el) => {
-              imageRefs.current[i] = el;
-            }}
-            className="absolute inset-0"
+            ref={(el) => { imageWrapRefs.current[i] = el; }}
+            className="absolute inset-0 z-0 pointer-events-none"
+            style={{ clipPath: "inset(50% 50% 50% 50%)", opacity: 0 }}
           >
             <Image
               src={link.image}
               alt={link.title}
               fill
-              className="object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
+              className="object-cover"
               unoptimized
             />
+            {/* Ciemny overlay, żeby tekst był czytelny */}
+            <div className="absolute inset-0 bg-black/60" />
           </div>
 
-          {/* Dark overlay */}
-          <div className="absolute inset-0 bg-black/50 group-hover:bg-black/40 transition-colors duration-700" />
+          {/* Treść wiersza */}
+          <div className="relative z-10 w-full flex items-center justify-between px-6 md:px-16 lg:px-24 gap-6">
+            {/* Lewa strona: numer + tytuł */}
+            <div className="flex items-baseline gap-6 md:gap-10">
+              <span className="text-xs md:text-sm uppercase tracking-[0.3em] text-[#444]">
+                {link.num}
+              </span>
+              <h2
+                ref={(el) => { titleRefs.current[i] = el; }}
+                className="text-6xl md:text-8xl font-light uppercase tracking-tight leading-none"
+                style={{ color: "#ffffff" }}
+              >
+                {link.title}
+              </h2>
+            </div>
 
-          {/* Content */}
-          <div className="relative z-10 h-full flex flex-col items-center justify-center px-6 text-center">
-            <span className="text-xs md:text-sm uppercase tracking-[0.4em] text-white/50 mb-6">
-              {link.num}
-            </span>
-            <h2 className="text-[15vw] leading-[0.9] font-bold uppercase tracking-wide text-white transition-transform duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.02]">
-              {link.title}
-            </h2>
-            <p className="mt-6 text-sm md:text-base text-[#999] tracking-wider uppercase">
-              {link.desc}
-            </p>
-            <span className="mt-10 text-2xl text-white/30 group-hover:text-[#8b5cf6] group-hover:translate-y-1 transition-all duration-700">
-              ↓
-            </span>
+            {/* Prawa strona: opis + strzałka */}
+            <div
+              ref={(el) => { rightRefs.current[i] = el; }}
+              className="hidden md:flex items-center gap-6 text-sm tracking-wider"
+              style={{ color: "#666" }}
+            >
+              <span className="max-w-xs text-right">{link.desc}</span>
+              <span className="text-2xl leading-none">→</span>
+            </div>
           </div>
-
-          {/* Bottom line */}
-          <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#8b5cf6]/20 to-transparent" />
         </a>
       ))}
     </section>
