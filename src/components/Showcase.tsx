@@ -38,8 +38,11 @@ const items = [
   },
 ];
 
-// Ostatnie zdjęcie: offset 2400 + szer. 300 = 2700, potem 800 ogona
-const TRACK_EXTRA_PX = 2400 + 300 + 800;
+// Lead (pozycja startowa pierwszego zdjęcia) i tail (ogon po ostatnim) — zero pustego tła
+const LEAD_VW = 0;
+const TAIL_PX = 0;
+// Track: lead + ostatni offset (2400) + szerokość zdjęcia (300) + ogon
+const TRACK_EXTRA_PX = 2400 + 300 + TAIL_PX;
 
 export default function Showcase() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -162,7 +165,7 @@ export default function Showcase() {
       <div
         ref={trackRef}
         className="relative h-screen z-[1]"
-        style={{ width: `calc(15vw + ${TRACK_EXTRA_PX}px)` }}
+        style={{ width: `calc(${LEAD_VW}vw + ${TRACK_EXTRA_PX}px)` }}
       >
         {items.map((item, i) => (
           <div
@@ -170,7 +173,7 @@ export default function Showcase() {
             ref={(el) => { itemRefs.current[i] = el; }}
             className="absolute"
             style={{
-              left: `calc(15vw + ${item.offsetX}px)`,
+              left: `calc(${LEAD_VW}vw + ${item.offsetX}px)`,
               top: item.top,
               width: "300px",
             }}
