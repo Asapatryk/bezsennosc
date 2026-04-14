@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SplitType from "split-type";
+import HeroClock from "./HeroClock";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -91,6 +92,9 @@ export default function Hero() {
           filter: "blur(40px)",
         }}
       />
+
+      {/* Elegancki zegar 3:00 za tekstem */}
+      <HeroClock />
 
       {/* Content */}
       <div className="relative z-10 text-center">
