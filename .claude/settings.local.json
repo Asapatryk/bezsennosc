@@ -12,7 +12,8 @@
       "mcp__nano-banana__generate_image",
       "Bash(mkdir -p src/components)",
       "Bash(node -e ':*)",
-      "Bash(npx next:*)"
+      "Bash(npx next:*)",
+      "Bash(npm run:*)"
     ]
   }
 }

@@ -24,40 +24,40 @@ export default function Claim() {
         const el = wrapperRefs.current[i];
         if (!el) return;
 
-        // Each headline occupies 1/3 of the 300vh section
-        // Calculate start/end as percentages of scroll through section
-        const segStart = i / 3;
-        const segEnd = (i + 1) / 3;
+        // Explicit initial state
+        gsap.set(el, { opacity: 0, y: 40 });
 
-        // Fade in
-        ScrollTrigger.create({
-          trigger: sectionRef.current,
-          start: `${segStart * 100}% bottom`,
-          end: `${(segStart + 0.07) * 100}% bottom`,
-          scrub: true,
-          animation: gsap.fromTo(el, { opacity: 0, y: 40 }, { opacity: 1, y: 0, ease: "power2.out" }),
+        // Single timeline per headline — fade in, hold, fade out
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: `${(i / 3) * 100}% bottom`,
+            end: `${((i + 1) / 3) * 100}% bottom`,
+            scrub: 1,
+            onEnter: () => console.log(`[Claim] headline ${i} enter: ${headlines[i].text}`),
+            onLeave: () => console.log(`[Claim] headline ${i} leave: ${headlines[i].text}`),
+            onEnterBack: () => console.log(`[Claim] headline ${i} enter back: ${headlines[i].text}`),
+          },
         });
 
-        // Fade out (not for last)
-        if (i < headlines.length - 1) {
-          ScrollTrigger.create({
-            trigger: sectionRef.current,
-            start: `${(segEnd - 0.07) * 100}% bottom`,
-            end: `${segEnd * 100}% bottom`,
-            scrub: true,
-            animation: gsap.fromTo(el, { opacity: 1, y: 0 }, { opacity: 0, y: -30, ease: "power2.in" }),
+        tl.to(el, {
+          opacity: 1,
+          y: 0,
+          duration: 0.25,
+          ease: "power2.out",
+          immediateRender: false,
+        })
+          .to(el, { opacity: 1, duration: 0.5, immediateRender: false })
+          .to(el, {
+            opacity: 0,
+            y: -30,
+            duration: 0.25,
+            ease: "power2.in",
+            immediateRender: false,
           });
-        } else {
-          // Last one fades when leaving section
-          ScrollTrigger.create({
-            trigger: sectionRef.current,
-            start: "bottom 55%",
-            end: "bottom top",
-            scrub: true,
-            animation: gsap.fromTo(el, { opacity: 1 }, { opacity: 0, ease: "power2.in" }),
-          });
-        }
       });
+
+      ScrollTrigger.refresh();
     }, sectionRef);
 
     return () => ctx.revert();
@@ -76,7 +76,9 @@ export default function Claim() {
       {headlines.map((h, i) => (
         <div
           key={i}
-          ref={(el) => { wrapperRefs.current[i] = el; }}
+          ref={(el) => {
+            wrapperRefs.current[i] = el;
+          }}
           className="fixed inset-0 flex items-center justify-center pointer-events-none"
           style={{ opacity: 0, zIndex: 10 }}
         >

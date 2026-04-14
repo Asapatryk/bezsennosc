@@ -57,7 +57,7 @@ export default function Showcase() {
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top top",
-          end: () => `+=${scrollWidth}`,
+          end: "+=5000",
           scrub: true,
           pin: true,
           anticipatePin: 1,
@@ -72,7 +72,7 @@ export default function Showcase() {
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top top",
-            end: () => `+=${scrollWidth}`,
+            end: "+=5000",
             scrub: true,
           },
         });
