@@ -12,29 +12,29 @@ const items = [
     image: "https://images.unsplash.com/photo-1547658719-da2b51169166?w=800&q=80",
     title: "Strony internetowe",
     desc: "Szyte na miarę, szybkie, konwertujące.",
-    alignSelf: "flex-start",
-    marginTop: "8vh",
+    top: "15%",
+    offsetX: 0,
   },
   {
     image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80",
     title: "Marketing Meta",
     desc: "Facebook & Instagram Ads z realnym ROI.",
-    alignSelf: "flex-end",
-    marginTop: "0",
+    top: "55%",
+    offsetX: 560,
   },
   {
     image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80",
     title: "Automatyzacja AI",
     desc: "Chatboty i systemy oszczędzające czas.",
-    alignSelf: "flex-start",
-    marginTop: "12vh",
+    top: "35%",
+    offsetX: 1140,
   },
   {
     image: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&q=80",
     title: "Branding",
     desc: "Tożsamość wizualna która zostaje w pamięci.",
-    alignSelf: "flex-end",
-    marginTop: "0",
+    top: "10%",
+    offsetX: 1720,
   },
 ];
 
@@ -42,7 +42,7 @@ export default function Showcase() {
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const bgTextRef = useRef<HTMLDivElement>(null);
-  const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     if (!sectionRef.current || !trackRef.current) return;
@@ -57,41 +57,61 @@ export default function Showcase() {
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top top",
-          end: "+=5000",
+          end: "+=8000",
           scrub: true,
           pin: true,
           anticipatePin: 1,
         },
       });
 
-      // Background text parallax
+      // Background color transition on section entry
+      gsap.fromTo(
+        sectionRef.current,
+        { backgroundColor: "#050505" },
+        {
+          backgroundColor: "#0d0518",
+          ease: "none",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top bottom",
+            end: "top top",
+            scrub: true,
+          },
+        }
+      );
+
+      // Background giant text — reveal reszta napisu podczas scrollowania
       if (bgTextRef.current) {
+        const textEl = bgTextRef.current.firstElementChild as HTMLElement | null;
+        const textWidth = textEl ? textEl.getBoundingClientRect().width : 0;
+        const revealDistance = Math.max(0, textWidth - window.innerWidth * 0.6);
         gsap.to(bgTextRef.current, {
-          x: -scrollWidth * 0.2,
+          x: -revealDistance,
           ease: "none",
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top top",
-            end: "+=5000",
+            end: "+=8000",
             scrub: true,
           },
         });
       }
 
-      // Clip-path reveal
-      imageRefs.current.forEach((img) => {
-        if (!img) return;
+      // Fade-in reveal for each image+caption
+      itemRefs.current.forEach((el) => {
+        if (!el) return;
         gsap.fromTo(
-          img,
-          { clipPath: "inset(0 100% 0 0)" },
+          el,
+          { opacity: 0, y: 30 },
           {
-            clipPath: "inset(0 0% 0 0)",
-            ease: "power2.inOut",
+            opacity: 1,
+            y: 0,
+            ease: "power2.out",
             scrollTrigger: {
-              trigger: img,
+              trigger: el,
               containerAnimation: scrollTween,
-              start: "left 90%",
-              end: "left 45%",
+              start: "left 95%",
+              end: "left 55%",
               scrub: true,
             },
           }
@@ -102,27 +122,30 @@ export default function Showcase() {
     return () => ctx.revert();
   }, []);
 
+  const trackExtraPx = 1720 + 300 + 600; // last offset + image width + tail padding
+
   return (
     <section
       id="showcase"
       ref={sectionRef}
       className="relative overflow-hidden"
-      style={{
-        background: "linear-gradient(135deg, #0d0518 0%, #0a0520 40%, #0d0518 100%)",
-      }}
+      style={{ backgroundColor: "#050505" }}
     >
-      {/* Giant background text */}
+      {/* Giant asymmetric background text */}
       <div
         ref={bgTextRef}
-        className="absolute top-1/2 -translate-y-1/2 left-[5vw] whitespace-nowrap pointer-events-none z-0 select-none"
+        className="absolute top-0 left-0 h-screen flex items-center whitespace-nowrap pointer-events-none z-0 select-none"
+        style={{ paddingLeft: "8vw" }}
       >
         <span
-          className="text-[25vw] font-black uppercase leading-none"
+          className="font-black uppercase leading-none"
           style={{
-            background: "linear-gradient(90deg, rgba(139,92,246,0.08), rgba(59,130,246,0.06), rgba(139,92,246,0.08))",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            backgroundClip: "text",
+            fontSize: "45vw",
+            color: "rgba(255,255,255,0.04)",
+            transform: "rotate(-2deg) translateY(2vw)",
+            transformOrigin: "left center",
+            letterSpacing: "-0.03em",
+            display: "inline-block",
           }}
         >
           BEZSENNOŚĆ
@@ -139,25 +162,26 @@ export default function Showcase() {
         </span>
       </div>
 
-      {/* Horizontal track — asymmetric via padding */}
+      {/* Horizontal track — absolute positioning for asymmetric layout */}
       <div
         ref={trackRef}
-        className="flex items-center gap-14 md:gap-20 pl-24 md:pl-40 pr-[15vw] h-screen relative z-[1]"
+        className="relative h-screen z-[1]"
+        style={{ width: `calc(15vw + ${trackExtraPx}px)` }}
       >
         {items.map((item, i) => (
           <div
             key={i}
-            className="flex-shrink-0 w-[70vw] sm:w-[50vw] md:w-[32vw] lg:w-[26vw]"
+            ref={(el) => { itemRefs.current[i] = el; }}
+            className="absolute"
             style={{
-              alignSelf: item.alignSelf as "flex-start" | "flex-end",
-              marginTop: item.marginTop,
-              paddingBottom: item.alignSelf === "flex-end" ? "8vh" : "0",
+              left: `calc(15vw + ${item.offsetX}px)`,
+              top: item.top,
+              width: "300px",
             }}
           >
             <div
-              ref={(el) => { imageRefs.current[i] = el; }}
               className="relative w-full overflow-hidden"
-              style={{ height: "36vh", maxHeight: "380px" }}
+              style={{ height: "25vh", maxHeight: "25vh" }}
             >
               <Image
                 src={item.image}
@@ -166,12 +190,15 @@ export default function Showcase() {
                 className="object-cover"
                 unoptimized
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0d0518]/50 to-transparent" />
             </div>
-            <h3 className="text-lg sm:text-xl md:text-2xl font-bold uppercase tracking-wider text-white mt-5 mb-2">
-              {item.title}
-            </h3>
-            <p className="text-sm text-[#999] tracking-wide">{item.desc}</p>
+            <div className="mt-4 flex items-baseline gap-3 whitespace-nowrap">
+              <h3 className="text-sm md:text-base font-bold uppercase tracking-wider text-white">
+                {item.title}
+              </h3>
+              <p className="text-xs md:text-sm text-[#999] tracking-wide">
+                {item.desc}
+              </p>
+            </div>
           </div>
         ))}
       </div>
