@@ -3,7 +3,6 @@ import Hero from "@/components/Hero";
 import Claim from "@/components/Claim";
 import Showcase from "@/components/Showcase";
 import Navigation from "@/components/Navigation";
-import TechSphere from "@/components/TechSphere";
 import Footer from "@/components/Footer";
 import SectionSeparator from "@/components/SectionSeparator";
 import SectionIndicator from "@/components/SectionIndicator";
@@ -24,9 +23,6 @@ export default function Home() {
       <SectionSeparator fromColor="#0d0518" toColor="#050505" />
 
       <Navigation />
-      <SectionSeparator fromColor="#050505" toColor="#050505" showDots />
-
-      <TechSphere />
 
       <Footer />
     </main>
