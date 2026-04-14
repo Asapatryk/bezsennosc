@@ -1,7 +1,9 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import Claim from "@/components/Claim";
+import PortalEnter from "@/components/PortalEnter";
 import Showcase from "@/components/Showcase";
+import PortalExit from "@/components/PortalExit";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import SectionSeparator from "@/components/SectionSeparator";
@@ -17,10 +19,10 @@ export default function Home() {
       <SectionSeparator fromColor="#050505" toColor="#050505" />
 
       <Claim />
-      <SectionSeparator fromColor="#050505" toColor="#0d0518" showDots />
 
+      <PortalEnter />
       <Showcase />
-      <SectionSeparator fromColor="#0d0518" toColor="#050505" />
+      <PortalExit />
 
       <Navigation />
 

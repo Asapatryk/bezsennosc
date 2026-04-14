@@ -76,22 +76,6 @@ export default function Showcase() {
         },
       });
 
-      // Tło: płynne przejście z #050505 na #0d0518 przy wjeździe
-      gsap.fromTo(
-        sectionRef.current,
-        { backgroundColor: "#050505" },
-        {
-          backgroundColor: "#0d0518",
-          ease: "none",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top bottom",
-            end: "top top",
-            scrub: true,
-          },
-        }
-      );
-
       // Parallax napisu — kończy się przed końcem pinu (2000px oddechu)
       if (bgTextRef.current && textRevealDistance > 0) {
         gsap.to(bgTextRef.current, {
@@ -136,7 +120,7 @@ export default function Showcase() {
       id="showcase"
       ref={sectionRef}
       className="relative overflow-hidden"
-      style={{ backgroundColor: "#050505" }}
+      style={{ backgroundColor: "#f0f0f0" }}
     >
       {/* OGROMNY napis w tle — min 300vw, bez overflow-hidden na kontenerze */}
       <div
@@ -153,7 +137,7 @@ export default function Showcase() {
           className="font-black uppercase leading-none"
           style={{
             fontSize: "30vw",
-            color: "rgba(255,255,255,0.04)",
+            color: "rgba(0,0,0,0.04)",
             transform: "rotate(-2deg) translateY(1.5vw)",
             transformOrigin: "left center",
             letterSpacing: "-0.03em",
@@ -167,7 +151,7 @@ export default function Showcase() {
       {/* Pionowa etykieta */}
       <div className="absolute left-6 md:left-12 top-1/2 -translate-y-1/2 z-10">
         <span
-          className="text-xs uppercase tracking-[0.3em] text-[#8b5cf6]/40 block"
+          className="text-xs uppercase tracking-[0.3em] text-[#666] block"
           style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
         >
           Co robimy
@@ -204,10 +188,10 @@ export default function Showcase() {
               />
             </div>
             <div className="mt-4 flex items-baseline gap-3 whitespace-nowrap">
-              <h3 className="text-sm md:text-base font-bold uppercase tracking-wider text-white">
+              <h3 className="text-sm md:text-base font-bold uppercase tracking-wider text-[#111]">
                 {item.title}
               </h3>
-              <p className="text-xs md:text-sm text-[#999] tracking-wide">
+              <p className="text-xs md:text-sm text-[#666] tracking-wide">
                 {item.desc}
               </p>
             </div>

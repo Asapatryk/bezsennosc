@@ -34,7 +34,7 @@ export default function HeroClock() {
         { scale: 0.8, opacity: 0 },
         {
           scale: 1,
-          opacity: 0.3,
+          opacity: 0.5,
           duration: 1.8,
           delay: 0.5,
           ease: "power2.out",
@@ -74,8 +74,8 @@ export default function HeroClock() {
         <div
           className="absolute inset-0 rounded-full"
           style={{
-            border: "1px solid rgba(255,255,255,0.06)",
-            boxShadow: "0 0 100px rgba(139,92,246,0.05)",
+            border: "1px solid rgba(255,255,255,0.12)",
+            boxShadow: "0 0 100px rgba(139,92,246,0.1)",
           }}
         />
 
@@ -93,7 +93,7 @@ export default function HeroClock() {
                 top: "4%",
                 width: "2px",
                 height: "2px",
-                background: "rgba(255,255,255,0.1)",
+                background: "rgba(255,255,255,0.2)",
                 borderRadius: "50%",
                 transform: "translate(-50%, -50%)",
               }}
@@ -109,7 +109,7 @@ export default function HeroClock() {
             bottom: "50%",
             width: "2px",
             height: "25%",
-            background: "rgba(255,255,255,0.15)",
+            background: "rgba(255,255,255,0.3)",
             transformOrigin: "50% 100%",
             transform: "translateX(-50%) rotate(90deg)",
           }}
@@ -123,7 +123,7 @@ export default function HeroClock() {
             bottom: "50%",
             width: "1px",
             height: "40%",
-            background: "rgba(255,255,255,0.1)",
+            background: "rgba(255,255,255,0.25)",
             transformOrigin: "50% 100%",
             transform: "translateX(-50%) rotate(0deg)",
           }}
@@ -192,7 +192,7 @@ export default function HeroClock() {
           style={{
             top: "calc(100% + 18px)",
             transform: "translateX(-50%)",
-            color: "rgba(255,255,255,0.08)",
+            color: "rgba(255,255,255,0.15)",
             fontSize: "11px",
             letterSpacing: "0.3em",
           }}
