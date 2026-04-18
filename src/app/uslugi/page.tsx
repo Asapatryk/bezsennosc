@@ -477,7 +477,18 @@ export default function UslugiPage() {
       {cards.map((card, ci) => (
         <div key={card.id}>
           {/* ── KARTA ── */}
-          <section className="relative flex justify-center px-4 md:px-8 py-16 md:py-24">
+          <section
+            className="relative flex justify-center items-start px-4 md:px-8"
+            style={{
+              /* Karta 1: więcej oddechu od hero; karty 2/3: minimalny top,
+                 żeby po wyjściu z horizontal scrolla karta była od razu widoczna */
+              paddingTop: ci === 0 ? "8vh" : "2vh",
+              /* Duży bottom + min-height — karta jest dłuższa i widoczna
+                 jeszcze w momencie gdy zaczyna się horizontal scroll */
+              paddingBottom: "12vh",
+              minHeight: "140vh",
+            }}
+          >
             <article
               className="relative w-full max-w-[1200px] p-8 md:p-16 lg:p-20"
               style={{
