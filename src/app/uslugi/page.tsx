@@ -187,37 +187,161 @@ const skyWords = [
 ];
 
 /* ═══════════════════════════════════════════════════
-   Gwiazdy — mały komponent CSS
+   Niebo — pure CSS chmury na jasnym błękicie
    ═══════════════════════════════════════════════════ */
 
-function Stars() {
-  const starCount = 80;
-  const starsRef = useRef<HTMLDivElement>(null);
+const clouds = [
+  { top: "6%",  width: 240, dur: 95,  delay: -10 },
+  { top: "14%", width: 170, dur: 55,  delay: -25 },
+  { top: "24%", width: 320, dur: 110, delay: -40 },
+  { top: "36%", width: 200, dur: 65,  delay: 0 },
+  { top: "48%", width: 280, dur: 85,  delay: -15 },
+  { top: "60%", width: 150, dur: 45,  delay: -30 },
+  { top: "72%", width: 240, dur: 75,  delay: -50 },
+  { top: "84%", width: 300, dur: 100, delay: -20 },
+];
 
-  useEffect(() => {
-    if (!starsRef.current) return;
-    const el = starsRef.current;
-    const children = el.children;
-    for (let i = 0; i < children.length; i++) {
-      const s = children[i] as HTMLElement;
-      s.style.left = `${Math.random() * 100}%`;
-      s.style.top = `${Math.random() * 100}%`;
-      s.style.width = `${1 + Math.random() * 2}px`;
-      s.style.height = s.style.width;
-      s.style.animationDelay = `${Math.random() * 4}s`;
-      s.style.animationDuration = `${2 + Math.random() * 3}s`;
-    }
-  }, []);
-
+function SkyBackground() {
   return (
-    <div ref={starsRef} className="absolute inset-0 overflow-hidden pointer-events-none">
-      {Array.from({ length: starCount }).map((_, i) => (
-        <span
+    <div
+      aria-hidden
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100vw",
+        height: "100vh",
+        zIndex: 0,
+        overflow: "hidden",
+        pointerEvents: "none",
+        background:
+          "linear-gradient(180deg, #0c0820 0%, #1a1038 22%, #2a1d52 48%, #3d2a6e 72%, #2a1845 92%, #0f0820 100%)",
+      }}
+    >
+      {/* Poświata księżyca w prawym górnym rogu */}
+      <div
+        style={{
+          position: "absolute",
+          top: "-10vh",
+          right: "-5vw",
+          width: "60vw",
+          height: "60vw",
+          borderRadius: "50%",
+          background:
+            "radial-gradient(circle, rgba(200,180,230,0.12) 0%, rgba(139,92,246,0.05) 30%, transparent 60%)",
+          filter: "blur(20px)",
+        }}
+      />
+
+      {/* Poświata fioletowa dolna — horyzont */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: "-20vh",
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "120vw",
+          height: "60vh",
+          background:
+            "radial-gradient(ellipse at center, rgba(139,92,246,0.15) 0%, rgba(139,92,246,0.05) 40%, transparent 70%)",
+          filter: "blur(30px)",
+        }}
+      />
+
+      {/* Chmury */}
+      {clouds.map((c, i) => (
+        <div
           key={i}
-          className="absolute rounded-full star-dot"
-          style={{ background: i % 8 === 0 ? "#8b5cf6" : "#ffffff" }}
-        />
+          className="sky-cloud"
+          style={{
+            top: c.top,
+            width: `${c.width}px`,
+            height: `${c.width * 0.42}px`,
+            animationDuration: `${c.dur}s`,
+            animationDelay: `${c.delay}s`,
+            opacity: 0.55 + (i % 3) * 0.1,
+            filter: `blur(${6 + (i % 4) * 2}px)`,
+          }}
+        >
+          <div className="sky-cloud-body" />
+          <div className="sky-cloud-bump sky-cloud-bump-a" />
+          <div className="sky-cloud-bump sky-cloud-bump-b" />
+          <div className="sky-cloud-bump sky-cloud-bump-c" />
+        </div>
       ))}
+
+      {/* Vignette — zaciemnione rogi, skupienie na środku */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background:
+            "radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(5,5,10,0.55) 95%)",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* Subtelny grain overlay */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          opacity: 0.06,
+          mixBlendMode: "overlay",
+          backgroundImage:
+            "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+          pointerEvents: "none",
+        }}
+      />
+
+      <style>{`
+        .sky-cloud {
+          position: absolute;
+          left: 0;
+          animation-name: sky-cloud-drift;
+          animation-timing-function: linear;
+          animation-iteration-count: infinite;
+          will-change: transform;
+        }
+        .sky-cloud-body {
+          position: absolute;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          height: 55%;
+          background:
+            radial-gradient(ellipse at center, rgba(185,170,210,0.85) 0%, rgba(140,120,170,0.6) 60%, rgba(90,70,130,0.3) 100%);
+          border-radius: 9999px;
+        }
+        .sky-cloud-bump {
+          position: absolute;
+          background:
+            radial-gradient(circle at 40% 30%, rgba(200,185,220,0.9) 0%, rgba(150,130,180,0.6) 55%, rgba(90,70,130,0.25) 100%);
+          border-radius: 50%;
+        }
+        .sky-cloud-bump-a {
+          left: 10%;
+          top: 8%;
+          width: 42%;
+          height: 78%;
+        }
+        .sky-cloud-bump-b {
+          left: 36%;
+          top: -8%;
+          width: 52%;
+          height: 96%;
+        }
+        .sky-cloud-bump-c {
+          left: 62%;
+          top: 18%;
+          width: 36%;
+          height: 62%;
+        }
+        @keyframes sky-cloud-drift {
+          0%   { transform: translateX(-100%); }
+          100% { transform: translateX(100vw); }
+        }
+      `}</style>
     </div>
   );
 }
@@ -305,13 +429,12 @@ export default function UslugiPage() {
       ref={wrapperRef}
       className="relative w-full overflow-x-hidden"
       style={{
-        background:
-          "radial-gradient(ellipse at 50% 20%, #12061f 0%, #0a0414 40%, #050505 100%)",
+        background: "#000000",
         color: "#ffffff",
       }}
     >
-      {/* Stałe gwieździste niebo za wszystkim */}
-      <Stars />
+      {/* Nocne niebo R3F — gradient, chmury, gwiazdy */}
+      <SkyBackground />
 
       {/* ══ HERO ══ */}
       <section className="relative flex items-center justify-center px-6" style={{ height: "100vh" }}>
