@@ -87,20 +87,22 @@ export default function Navbar() {
       ref={navRef}
       className={`fixed top-0 left-0 w-full z-50 transition-colors duration-500 ${bgClass}`}
     >
-      <div className="flex items-center justify-between px-6 md:px-12 py-5">
+      <div className="flex items-center justify-between px-8 md:px-16 py-7 md:py-8">
         <a
           href="/"
-          className={`text-xs uppercase tracking-widest font-bold transition-colors duration-500 ${logoColor}`}
+          className={`text-sm uppercase font-bold transition-colors duration-500 ${logoColor}`}
+          style={{ letterSpacing: "0.28em" }}
         >
           Studio Bezsenność
         </a>
 
-        <div className="flex items-center" style={{ gap: "32px" }}>
+        <div className="flex items-center" style={{ gap: "44px" }}>
           {links.map((l) => (
             <a
               key={l.href}
               href={l.href}
-              className={`text-xs uppercase tracking-wider transition-colors duration-500 ${linkColor}`}
+              className={`text-sm uppercase transition-colors duration-500 ${linkColor}`}
+              style={{ letterSpacing: "0.22em" }}
             >
               {l.label}
             </a>

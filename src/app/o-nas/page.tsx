@@ -5,6 +5,7 @@ import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SplitType from "split-type";
+import Navbar from "@/components/Navbar";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -97,6 +98,12 @@ export default function ONasPage() {
   const ctaTailRef = useRef<HTMLDivElement>(null);
 
   const progressRef = useRef<HTMLDivElement>(null);
+  const introRef = useRef<HTMLDivElement>(null);
+  const introTimeRef = useRef<HTMLDivElement>(null);
+  const heroSectionRef = useRef<HTMLElement>(null);
+  const spotlightRef = useRef<HTMLDivElement>(null);
+  const heartbeatRef = useRef<HTMLDivElement>(null);
+  const [introDone, setIntroDone] = useState(false);
   const time = useLiveTime();
 
   useEffect(() => {
@@ -120,6 +127,52 @@ export default function ONasPage() {
             },
           }
         );
+      }
+
+      // ═ INTRO LOADER — "03:00" morfuje do zegara w rogu ═
+      if (introRef.current && introTimeRef.current) {
+        const introTl = gsap.timeline({
+          onComplete: () => setIntroDone(true),
+        });
+        introTl
+          .from(introTimeRef.current.querySelectorAll(".intro-char"), {
+            opacity: 0,
+            y: 30,
+            stagger: 0.08,
+            duration: 0.5,
+            ease: "power3.out",
+          })
+          .from(
+            introTimeRef.current.querySelector(".intro-label"),
+            { opacity: 0, y: -10, duration: 0.4 },
+            "-=0.3"
+          )
+          .to({}, { duration: 1.2 })
+          .to(introTimeRef.current, {
+            scale: 0.12,
+            x: () => window.innerWidth * 0.42,
+            y: () => -window.innerHeight * 0.42,
+            opacity: 0,
+            duration: 0.9,
+            ease: "power3.inOut",
+          })
+          .to(
+            introRef.current,
+            { opacity: 0, duration: 0.5, ease: "power2.inOut" },
+            "-=0.5"
+          );
+      }
+
+      // ═ Hero heartbeat pulse (purple glow oddycha) ═
+      if (heartbeatRef.current) {
+        gsap.to(heartbeatRef.current, {
+          scale: 1.12,
+          opacity: 0.9,
+          duration: 0.6,
+          ease: "sine.inOut",
+          repeat: -1,
+          yoyo: true,
+        });
       }
 
       // ═ HERO split ═
@@ -476,6 +529,43 @@ export default function ONasPage() {
     };
   }, []);
 
+  // ═ Mouse spotlight — fioletowa aureola podąża za kursorem (tylko gdy hero widoczny) ═
+  useEffect(() => {
+    const spot = spotlightRef.current;
+    const hero = heroSectionRef.current;
+    if (!spot || !hero) return;
+
+    let visible = true;
+    const onMove = (e: MouseEvent) => {
+      if (!visible) return;
+      gsap.to(spot, {
+        x: e.clientX,
+        y: e.clientY,
+        duration: 0.7,
+        ease: "power2.out",
+      });
+    };
+    const onScroll = () => {
+      const rect = hero.getBoundingClientRect();
+      const inView = rect.bottom > 0 && rect.top < window.innerHeight * 0.6;
+      if (inView !== visible) {
+        visible = inView;
+        gsap.to(spot, {
+          opacity: inView ? 1 : 0,
+          duration: 0.5,
+          ease: "power2.out",
+        });
+      }
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, []);
+
   return (
     <main
       ref={pageRef}
@@ -486,6 +576,95 @@ export default function ONasPage() {
         color: "#ffffff",
       }}
     >
+      {/* ══ NAVBAR ══ */}
+      <Navbar />
+
+      {/* ══ INTRO LOADER — "03:00" morfuje do zegara ══ */}
+      <div
+        ref={introRef}
+        className="fixed inset-0 z-[60] flex items-center justify-center"
+        style={{
+          background: "#050505",
+          pointerEvents: introDone ? "none" : "auto",
+        }}
+      >
+        <div
+          ref={introTimeRef}
+          className="text-center"
+          style={{ transformOrigin: "center center" }}
+        >
+          <span
+            className="intro-label block uppercase mb-4"
+            style={{
+              fontSize: "10px",
+              letterSpacing: "0.5em",
+              color: "#555",
+            }}
+          >
+            Czas warszawski · noc
+          </span>
+          <div
+            className="font-mono flex items-center justify-center"
+            style={{
+              fontSize: "clamp(80px, 16vw, 240px)",
+              color: "#8b5cf6",
+              letterSpacing: "0.1em",
+              fontFeatureSettings: '"tnum"',
+              lineHeight: 1,
+            }}
+          >
+            <span className="intro-char inline-block">0</span>
+            <span className="intro-char inline-block">3</span>
+            <span
+              className="intro-char inline-block"
+              style={{ animation: "intro-blink 0.9s steps(2) infinite" }}
+            >
+              :
+            </span>
+            <span className="intro-char inline-block">0</span>
+            <span className="intro-char inline-block">0</span>
+            <span
+              className="inline-block ml-3"
+              style={{
+                width: "0.08em",
+                height: "0.9em",
+                background: "#8b5cf6",
+                animation: "intro-blink 0.6s steps(2) infinite",
+              }}
+            />
+          </div>
+          <span
+            className="block uppercase mt-6 italic"
+            style={{
+              fontSize: "13px",
+              letterSpacing: "0.2em",
+              color: "#777",
+            }}
+          >
+            — Bezsenność, załoga nocna.
+          </span>
+        </div>
+      </div>
+
+      {/* ══ Mouse spotlight — fioletowa aureola w hero ══ */}
+      <div
+        ref={spotlightRef}
+        className="fixed pointer-events-none z-30"
+        style={{
+          top: 0,
+          left: 0,
+          width: "520px",
+          height: "520px",
+          marginLeft: "-260px",
+          marginTop: "-260px",
+          background:
+            "radial-gradient(circle, rgba(139,92,246,0.22) 0%, rgba(139,92,246,0.08) 30%, transparent 60%)",
+          filter: "blur(40px)",
+          mixBlendMode: "screen",
+          willChange: "transform",
+        }}
+      />
+
       {/* Scroll progress */}
       <div
         className="fixed top-0 left-0 w-px h-screen z-40 pointer-events-none"
@@ -501,10 +680,10 @@ export default function ONasPage() {
         />
       </div>
 
-      {/* Zegar */}
+      {/* Zegar — przesunięty pod navbar */}
       <div
-        className="fixed top-6 right-6 z-40 pointer-events-none select-none hidden md:block"
-        style={{ fontFeatureSettings: '"tnum"' }}
+        className="fixed right-6 z-40 pointer-events-none select-none hidden md:block"
+        style={{ top: "104px", fontFeatureSettings: '"tnum"' }}
       >
         <div
           className="uppercase mb-1"
@@ -525,7 +704,27 @@ export default function ONasPage() {
       </div>
 
       {/* ╔═ 01 — MANIFEST ═╗ */}
-      <section className="relative h-screen flex items-center justify-center px-6 overflow-hidden">
+      <section
+        ref={heroSectionRef}
+        className="relative h-screen flex items-center justify-center px-6 overflow-hidden"
+      >
+        {/* Pulsujący heartbeat glow za tekstem */}
+        <div
+          ref={heartbeatRef}
+          className="absolute pointer-events-none origin-center"
+          style={{
+            width: "min(80vw, 900px)",
+            height: "min(80vw, 900px)",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            background:
+              "radial-gradient(circle, rgba(139,92,246,0.18) 0%, rgba(139,92,246,0.07) 35%, transparent 65%)",
+            filter: "blur(60px)",
+            opacity: 0.6,
+          }}
+        />
+
         <span
           className="chapter-no absolute top-[8vh] left-4 md:left-12 pointer-events-none select-none"
           style={{
@@ -538,22 +737,41 @@ export default function ONasPage() {
         >
           01
         </span>
-        {/* rotated asterisk decorator */}
+
+        {/* Mrugające gwiazdki rozsypane po hero */}
         <span
-          className="absolute top-[22vh] right-[12vw] text-[#8b5cf6]/40 select-none"
-          style={{
-            fontSize: "48px",
-            transform: "rotate(18deg)",
-          }}
+          className="star absolute top-[22vh] right-[12vw] text-[#8b5cf6] select-none pointer-events-none"
+          style={{ fontSize: "48px", transform: "rotate(18deg)", animationDelay: "0s" }}
         >
           ✦
         </span>
         <span
-          className="absolute bottom-[22vh] left-[14vw] text-[#8b5cf6]/30 select-none"
-          style={{
-            fontSize: "32px",
-            transform: "rotate(-12deg)",
-          }}
+          className="star absolute bottom-[22vh] left-[14vw] text-[#8b5cf6] select-none pointer-events-none"
+          style={{ fontSize: "32px", transform: "rotate(-12deg)", animationDelay: "1.4s" }}
+        >
+          ✦
+        </span>
+        <span
+          className="star absolute top-[30vh] left-[10vw] text-[#8b5cf6] select-none pointer-events-none"
+          style={{ fontSize: "18px", animationDelay: "0.6s" }}
+        >
+          ✦
+        </span>
+        <span
+          className="star absolute bottom-[35vh] right-[18vw] text-[#8b5cf6] select-none pointer-events-none"
+          style={{ fontSize: "22px", animationDelay: "2.1s" }}
+        >
+          ✦
+        </span>
+        <span
+          className="star absolute top-[48vh] right-[8vw] text-[#8b5cf6] select-none pointer-events-none"
+          style={{ fontSize: "14px", animationDelay: "1.1s" }}
+        >
+          ✦
+        </span>
+        <span
+          className="star absolute bottom-[18vh] left-[40vw] text-[#8b5cf6] select-none pointer-events-none"
+          style={{ fontSize: "12px", animationDelay: "2.8s" }}
         >
           ✦
         </span>
@@ -564,7 +782,7 @@ export default function ONasPage() {
           </span>
           <h1
             ref={heroHeadingRef}
-            className="font-black uppercase"
+            className="hero-heading font-black uppercase"
             style={{
               fontSize: "clamp(80px, 17vw, 280px)",
               lineHeight: 0.85,
@@ -586,10 +804,11 @@ export default function ONasPage() {
           </p>
         </div>
         <div
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-[0.35em]"
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-[0.35em] flex flex-col items-center gap-2"
           style={{ color: "#555" }}
         >
-          ↓ Scroll
+          <span>↓ Scroll</span>
+          <span className="scroll-line inline-block w-[1px] h-8 bg-[#8b5cf6]/40" />
         </div>
       </section>
 
@@ -1724,6 +1943,38 @@ export default function ONasPage() {
           />
         </div>
       </section>
+
+      {/* ══ Style: keyframes + hover liter ══ */}
+      <style>{`
+        @keyframes intro-blink {
+          0%, 50% { opacity: 1; }
+          50.01%, 100% { opacity: 0; }
+        }
+        @keyframes twinkle {
+          0%, 100% { opacity: 0.15; transform: scale(0.9); }
+          50% { opacity: 0.7; transform: scale(1.15); }
+        }
+        .star {
+          animation: twinkle 3.2s ease-in-out infinite;
+          will-change: opacity, transform;
+        }
+        .hero-heading .char {
+          display: inline-block;
+          transition: color 0.35s ease, transform 0.35s cubic-bezier(0.16,1,0.3,1);
+          cursor: default;
+        }
+        .hero-heading .char:hover {
+          color: #8b5cf6;
+          transform: translateY(-10px) scale(1.06);
+        }
+        .scroll-line {
+          animation: scroll-line-pulse 1.8s ease-in-out infinite;
+        }
+        @keyframes scroll-line-pulse {
+          0%, 100% { opacity: 0.3; transform: scaleY(1); transform-origin: top; }
+          50% { opacity: 1; transform: scaleY(1.4); transform-origin: top; }
+        }
+      `}</style>
     </main>
   );
 }
