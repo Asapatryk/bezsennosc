@@ -87,7 +87,7 @@ export default function Navbar() {
       ref={navRef}
       className={`fixed top-0 left-0 w-full z-50 transition-colors duration-500 ${bgClass}`}
     >
-      <div className="flex items-center justify-between px-8 md:px-16 py-7 md:py-8">
+      <div className="flex items-center justify-between px-8 md:px-20 py-10 md:py-12">
         <a
           href="/"
           className={`text-sm uppercase font-bold transition-colors duration-500 ${logoColor}`}

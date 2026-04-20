@@ -683,7 +683,7 @@ export default function ONasPage() {
       {/* Zegar — przesunięty pod navbar */}
       <div
         className="fixed right-6 z-40 pointer-events-none select-none hidden md:block"
-        style={{ top: "104px", fontFeatureSettings: '"tnum"' }}
+        style={{ top: "130px", fontFeatureSettings: '"tnum"' }}
       >
         <div
           className="uppercase mb-1"
