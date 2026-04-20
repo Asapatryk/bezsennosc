@@ -16,33 +16,26 @@ const items = [
     offsetX: 0,
   },
   {
-    image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80",
+    image: "/images/marketing-meta.png",
     title: "Marketing Meta",
     desc: "Facebook & Instagram Ads z realnym ROI.",
     top: "55%",
     offsetX: 800,
   },
   {
-    image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80",
+    image: "/images/automatyzacja-ai.png",
     title: "Automatyzacja AI",
     desc: "Chatboty i systemy oszczędzające czas.",
     top: "35%",
     offsetX: 1600,
-  },
-  {
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&q=80",
-    title: "Branding",
-    desc: "Tożsamość wizualna która zostaje w pamięci.",
-    top: "10%",
-    offsetX: 2400,
   },
 ];
 
 // Lead (pozycja startowa pierwszego zdjęcia) i tail (ogon po ostatnim) — zero pustego tła
 const LEAD_VW = 0;
 const TAIL_PX = 0;
-// Track: lead + ostatni offset (2400) + szerokość zdjęcia (300) + ogon
-const TRACK_EXTRA_PX = 2400 + 300 + TAIL_PX;
+// Track: lead + ostatni offset (1600) + szerokość zdjęcia (300) + ogon
+const TRACK_EXTRA_PX = 1600 + 300 + TAIL_PX;
 
 export default function Showcase() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -63,8 +56,8 @@ export default function Showcase() {
       // Przesunięcie tak, żeby ostatnia litera mogła być widoczna na lewym brzegu viewportu
       const textRevealDistance = Math.max(0, textWidth - window.innerWidth * 0.3);
 
-      // Długość scrolla = pełny reveal napisu + 2000px oddechu po ostatniej literze
-      const scrollEnd = textRevealDistance + 2000;
+      // Długość scrolla = pełny reveal napisu + 1500px oddechu po ostatniej literze
+      const scrollEnd = textRevealDistance + 1500;
 
       const scrollTween = gsap.to(track, {
         x: -trackScrollDistance,

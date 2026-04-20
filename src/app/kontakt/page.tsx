@@ -86,12 +86,30 @@ const socials = [
   },
 ];
 
+const EEG_PATH =
+  "M 0 55 Q 10 50 20 55 T 40 55 T 60 55 T 80 55 L 100 55 L 108 38 L 114 70 L 120 28 L 126 80 L 132 50 L 138 60 L 144 50 L 180 55 Q 195 51 210 55 T 240 55 L 270 55 L 276 47 L 282 62 L 288 44 L 294 60 L 300 50 L 340 55 Q 352 50 364 55 T 388 55 L 420 55 L 428 32 L 434 76 L 440 22 L 446 82 L 452 50 L 458 58 L 500 55 Q 515 50 530 55 T 560 55 T 590 55 L 600 55";
+
 function nowClock() {
   const d = new Date();
   const h = String(d.getHours()).padStart(2, "0");
   const m = String(d.getMinutes()).padStart(2, "0");
   const s = String(d.getSeconds()).padStart(2, "0");
   return `${h}:${m}:${s}`;
+}
+
+function getStatus(d: Date): boolean {
+  const day = d.getDay();
+  const h = d.getHours();
+  if (day === 0 || day === 6) return h >= 12 && h < 18;
+  if (day === 5) return h >= 14 && h < 18;
+  return h >= 14 && h < 22;
+}
+
+function getDayBlock(d: Date): number {
+  const day = d.getDay();
+  if (day === 5) return 1;
+  if (day === 0 || day === 6) return 2;
+  return 0;
 }
 
 export default function KontaktPage() {
@@ -103,6 +121,9 @@ export default function KontaktPage() {
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
   const [clock, setClock] = useState("--:--:--");
+  const [isAvailable, setIsAvailable] = useState(true);
+  const [currentDayBlock, setCurrentDayBlock] = useState(0);
+  const [activity, setActivity] = useState(87);
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
 
@@ -112,6 +133,29 @@ export default function KontaktPage() {
   useEffect(() => {
     setClock(nowClock());
     const id = setInterval(() => setClock(nowClock()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  /* Status + day */
+  useEffect(() => {
+    const update = () => {
+      const d = new Date();
+      setIsAvailable(getStatus(d));
+      setCurrentDayBlock(getDayBlock(d));
+    };
+    update();
+    const id = setInterval(update, 30000);
+    return () => clearInterval(id);
+  }, []);
+
+  /* Fake activity meter — drifts naturally */
+  useEffect(() => {
+    const id = setInterval(() => {
+      setActivity((prev) => {
+        const next = prev + Math.round((Math.random() - 0.5) * 6);
+        return Math.max(72, Math.min(96, next));
+      });
+    }, 1800);
     return () => clearInterval(id);
   }, []);
 
@@ -677,213 +721,336 @@ export default function KontaktPage() {
         </div>
 
         {/* ════ SIDEBAR ════ */}
-        <aside className="lg:col-span-1 flex flex-col gap-5 md:gap-7">
-          {/* Block 1: direct */}
-          <section
-            className="p-6 md:p-8"
-            style={{
-              background: "#0a0a0a",
-              border: "1px solid rgba(139,92,246,.15)",
-              borderRadius: "12px",
-            }}
-          >
-            <span
-              className="font-mono uppercase block"
-              style={{
-                fontSize: "10px",
-                letterSpacing: "0.35em",
-                color: "#8b5cf6",
-                marginBottom: "22px",
-              }}
-            >
-              [ bezpośredni kontakt ]
-            </span>
-            <div style={{ marginBottom: "24px" }}>
+        <aside className="lg:col-span-1 flex flex-col gap-5">
+          {/* 1. STATUS PANEL */}
+          <section className="kontakt-card relative overflow-hidden p-6 md:p-7">
+            <div className="kontakt-card-shine" aria-hidden />
+            <div className="flex items-center justify-between mb-5 relative">
+              <span className="kontakt-label">[ status systemu ]</span>
               <span
-                className="font-mono uppercase block"
-                style={{
-                  fontSize: "10px",
-                  color: "#555",
-                  letterSpacing: "0.3em",
-                  marginBottom: "10px",
-                }}
+                className={`kontakt-pill ${
+                  isAvailable ? "kontakt-pill-live" : "kontakt-pill-away"
+                }`}
               >
-                telefon
+                <span className="kontakt-pill-dot" />
+                {isAvailable ? "LIVE" : "AWAY"}
               </span>
-              <a
-                href="tel:+48722744722"
-                className="font-black block transition-colors duration-300"
-                style={{
-                  fontSize: "clamp(20px, 2vw, 26px)",
-                  letterSpacing: "-0.01em",
-                  color: "#fff",
-                }}
-                onMouseOver={(e) =>
-                  (e.currentTarget.style.color = "#8b5cf6")
-                }
-                onMouseOut={(e) => (e.currentTarget.style.color = "#fff")}
-              >
-                +48 722 744 722
-              </a>
             </div>
-            <div>
-              <span
-                className="font-mono uppercase block"
+            <div className="relative">
+              <div
+                className="font-black uppercase mb-1"
                 style={{
-                  fontSize: "10px",
-                  color: "#555",
-                  letterSpacing: "0.3em",
-                  marginBottom: "10px",
+                  fontSize: "clamp(28px, 3vw, 36px)",
+                  letterSpacing: "-0.02em",
+                  lineHeight: 1,
                 }}
               >
-                email
-              </span>
-              <a
-                href="mailto:studiobezsennosc@gmail.com"
-                className="block break-all transition-colors duration-300"
-                style={{ fontSize: "15px", color: "#fff" }}
-                onMouseOver={(e) =>
-                  (e.currentTarget.style.color = "#8b5cf6")
-                }
-                onMouseOut={(e) => (e.currentTarget.style.color = "#fff")}
-              >
-                studiobezsennosc@gmail.com
-              </a>
+                {isAvailable ? "Available" : "Offline"}
+              </div>
+              <div style={{ fontSize: "13px", color: "#888" }}>
+                {isAvailable
+                  ? "Jesteśmy przy klawiaturze."
+                  : "Wracamy w godzinach pracy. Odpowiedź < 24h."}
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4 mt-6 relative">
+              <div>
+                <div className="kontakt-mini-label">local · pl</div>
+                <div className="font-mono text-white tabular-nums" style={{ fontSize: "15px" }}>
+                  {clock}
+                </div>
+              </div>
+              <div>
+                <div className="kontakt-mini-label">uptime</div>
+                <div className="font-mono text-white" style={{ fontSize: "15px" }}>
+                  ∞ d
+                </div>
+              </div>
             </div>
           </section>
 
-          {/* Block 2: hours */}
-          <section
-            className="p-6 md:p-8"
-            style={{
-              background: "#0a0a0a",
-              border: "1px solid rgba(139,92,246,.15)",
-              borderRadius: "12px",
-            }}
-          >
+          {/* 2. CONTACT */}
+          <section className="kontakt-card p-6 md:p-7">
             <span
-              className="font-mono uppercase block"
-              style={{
-                fontSize: "10px",
-                letterSpacing: "0.35em",
-                color: "#8b5cf6",
-                marginBottom: "22px",
-              }}
+              className="kontakt-label"
+              style={{ display: "block", marginBottom: "18px" }}
+            >
+              [ bezpośredni kontakt ]
+            </span>
+            <a href="tel:+48722744722" className="kontakt-contact">
+              <span className="kontakt-contact-icon">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                </svg>
+              </span>
+              <span className="flex flex-col flex-1 min-w-0">
+                <span className="kontakt-mini-label">telefon</span>
+                <span
+                  className="font-black text-white"
+                  style={{ fontSize: "20px", letterSpacing: "-0.01em" }}
+                >
+                  +48 722 744 722
+                </span>
+              </span>
+              <span className="kontakt-arrow" aria-hidden>
+                →
+              </span>
+            </a>
+            <a
+              href="mailto:studiobezsennosc@gmail.com"
+              className="kontakt-contact"
+              style={{ marginTop: "12px" }}
+            >
+              <span className="kontakt-contact-icon">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="3" y="5" width="18" height="14" rx="2" />
+                  <path d="M3 7l9 6 9-6" />
+                </svg>
+              </span>
+              <span className="flex flex-col flex-1 min-w-0">
+                <span className="kontakt-mini-label">email</span>
+                <span
+                  className="text-white truncate"
+                  style={{ fontSize: "14px" }}
+                >
+                  studiobezsennosc@gmail.com
+                </span>
+              </span>
+              <span className="kontakt-arrow" aria-hidden>
+                →
+              </span>
+            </a>
+          </section>
+
+          {/* 3. EEG / BRAIN MONITOR — animated */}
+          <section className="kontakt-card p-6 md:p-7">
+            <div className="flex items-center justify-between mb-4">
+              <span className="kontakt-label">[ studio.signal ]</span>
+              <span className="kontakt-pill kontakt-pill-rec">
+                <span className="kontakt-pill-dot" />
+                REC
+              </span>
+            </div>
+            <div className="kontakt-eeg-wrap" aria-hidden>
+              <div className="kontakt-eeg-grid" />
+              <div className="kontakt-eeg-track">
+                <svg
+                  viewBox="0 0 600 110"
+                  preserveAspectRatio="none"
+                  className="kontakt-eeg-svg"
+                >
+                  <path
+                    d={EEG_PATH}
+                    stroke="#8b5cf6"
+                    strokeWidth="1.5"
+                    fill="none"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <svg
+                  viewBox="0 0 600 110"
+                  preserveAspectRatio="none"
+                  className="kontakt-eeg-svg"
+                >
+                  <path
+                    d={EEG_PATH}
+                    stroke="#8b5cf6"
+                    strokeWidth="1.5"
+                    fill="none"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+              <div className="kontakt-eeg-fade" />
+              <div className="kontakt-eeg-scan" />
+            </div>
+            <div className="grid grid-cols-3 gap-3 mt-5">
+              <div>
+                <div className="kontakt-mini-label">activity</div>
+                <div
+                  className="font-mono text-white tabular-nums"
+                  style={{ fontSize: "13px" }}
+                >
+                  {activity}
+                  <span style={{ color: "#555" }}>%</span>
+                </div>
+              </div>
+              <div>
+                <div className="kontakt-mini-label">caffeine</div>
+                <div
+                  className="font-mono text-white"
+                  style={{ fontSize: "13px" }}
+                >
+                  ∞ <span style={{ color: "#555" }}>mg</span>
+                </div>
+              </div>
+              <div>
+                <div className="kontakt-mini-label">sleep</div>
+                <div
+                  className="font-mono text-white"
+                  style={{ fontSize: "13px" }}
+                >
+                  0.0 <span style={{ color: "#555" }}>h</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* 4. HOURS */}
+          <section className="kontakt-card p-6 md:p-7">
+            <span
+              className="kontakt-label"
+              style={{ display: "block", marginBottom: "18px" }}
             >
               [ godziny pracy ]
             </span>
             <div className="flex flex-col gap-3">
-              {workingHours.map((w) => (
-                <div
-                  key={w.days}
-                  className="flex items-baseline justify-between"
-                  style={{
-                    borderBottom: "1px dashed rgba(139,92,246,.1)",
-                    paddingBottom: "8px",
-                  }}
-                >
-                  <span
-                    className="uppercase"
+              {workingHours.map((w, i) => {
+                const isToday = currentDayBlock === i;
+                return (
+                  <div
+                    key={w.days}
+                    className="flex items-center justify-between"
                     style={{
-                      fontSize: "12px",
-                      color: "#aaa",
-                      letterSpacing: "0.1em",
+                      borderBottom: "1px dashed rgba(139,92,246,.1)",
+                      paddingBottom: "9px",
                     }}
                   >
-                    {w.days}
-                  </span>
-                  <span
-                    className="font-mono"
-                    style={{
-                      fontSize: "13px",
-                      color: "#fff",
-                      letterSpacing: "0.02em",
-                    }}
-                  >
-                    {w.hrs}
-                  </span>
-                </div>
-              ))}
+                    <span
+                      className="flex items-center gap-2 uppercase"
+                      style={{
+                        fontSize: "12px",
+                        color: isToday ? "#fff" : "#888",
+                        letterSpacing: "0.1em",
+                      }}
+                    >
+                      {isToday ? (
+                        <span className="kontakt-today-dot" />
+                      ) : (
+                        <span
+                          style={{
+                            width: "6px",
+                            height: "1px",
+                            background: "#333",
+                            display: "inline-block",
+                          }}
+                        />
+                      )}
+                      {w.days}
+                    </span>
+                    <span
+                      className="font-mono"
+                      style={{
+                        fontSize: "13px",
+                        color: isToday ? "#8b5cf6" : "#aaa",
+                        letterSpacing: "0.02em",
+                      }}
+                    >
+                      {w.hrs}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
             <p
               className="italic mt-5"
-              style={{
-                fontSize: "12px",
-                color: "#666",
-                lineHeight: 1.5,
-              }}
+              style={{ fontSize: "12px", color: "#666", lineHeight: 1.5 }}
             >
               Piszemy też poza godzinami. Odpowiedź do 24h.
             </p>
           </section>
 
-          {/* Block 3: social */}
-          <section
-            className="p-6 md:p-8"
-            style={{
-              background: "#0a0a0a",
-              border: "1px solid rgba(139,92,246,.15)",
-              borderRadius: "12px",
-            }}
-          >
+          {/* 5. SOCIAL */}
+          <section className="kontakt-card p-6 md:p-7">
             <span
-              className="font-mono uppercase block"
-              style={{
-                fontSize: "10px",
-                letterSpacing: "0.35em",
-                color: "#8b5cf6",
-                marginBottom: "22px",
-              }}
+              className="kontakt-label"
+              style={{ display: "block", marginBottom: "18px" }}
             >
               [ social ]
             </span>
-            <div className="flex flex-col gap-3">
+            <div className="grid grid-cols-2 gap-3">
               {socials.map((s) => (
                 <a
                   key={s.label}
                   href={s.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="kontakt-social flex items-center justify-between px-4 py-3 transition-all"
-                  style={{
-                    border: "1px solid rgba(139,92,246,.2)",
-                    borderRadius: "8px",
-                    color: "#aaa",
-                  }}
+                  className="kontakt-social-card"
                 >
+                  <span className="kontakt-social-icon">
+                    {s.label === "Instagram" ? (
+                      <svg
+                        width="22"
+                        height="22"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.6"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <rect x="3" y="3" width="18" height="18" rx="5" />
+                        <circle cx="12" cy="12" r="4" />
+                        <circle cx="17.5" cy="6.5" r="0.7" fill="currentColor" />
+                      </svg>
+                    ) : (
+                      <svg
+                        width="22"
+                        height="22"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.6"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+                      </svg>
+                    )}
+                  </span>
                   <span
-                    className="uppercase"
-                    style={{ fontSize: "13px", letterSpacing: "0.15em" }}
+                    className="font-mono uppercase"
+                    style={{
+                      fontSize: "11px",
+                      letterSpacing: "0.2em",
+                      color: "#aaa",
+                    }}
                   >
                     {s.label}
                   </span>
-                  <span className="flex items-center gap-2">
-                    <span
-                      className="font-mono"
-                      style={{
-                        fontSize: "10px",
-                        letterSpacing: "0.2em",
-                        color: "#8b5cf6",
-                      }}
-                    >
-                      {s.short}
-                    </span>
-                    <span style={{ color: "#8b5cf6" }}>→</span>
+                  <span className="kontakt-social-arrow" aria-hidden>
+                    ↗
                   </span>
                 </a>
               ))}
             </div>
           </section>
 
-          {/* Block 4: signature */}
+          {/* 6. SIGNATURE */}
           <section className="px-2">
             <p
               className="italic"
-              style={{
-                fontSize: "13px",
-                color: "#666",
-                lineHeight: 1.6,
-              }}
+              style={{ fontSize: "13px", color: "#666", lineHeight: 1.6 }}
             >
               &bdquo;Odpowiadamy zawsze — w zaciszu nocy albo rano przy kawie.&rdquo;
             </p>
@@ -929,6 +1096,248 @@ export default function KontaktPage() {
           background: rgba(139,92,246,0.08);
           border-color: #8b5cf6 !important;
           color: #fff !important;
+        }
+
+        /* ─── card base ─── */
+        .kontakt-card {
+          background: #0a0a0a;
+          border: 1px solid rgba(139,92,246,.15);
+          border-radius: 12px;
+          transition: border-color .4s ease, transform .4s cubic-bezier(.16,1,.3,1);
+        }
+        .kontakt-card:hover {
+          border-color: rgba(139,92,246,.3);
+        }
+        .kontakt-card-shine {
+          position: absolute;
+          inset: 0;
+          background: radial-gradient(circle at 85% 0%, rgba(139,92,246,.18), transparent 55%);
+          pointer-events: none;
+        }
+
+        /* ─── labels ─── */
+        .kontakt-label {
+          font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+          text-transform: uppercase;
+          font-size: 10px;
+          letter-spacing: 0.35em;
+          color: #8b5cf6;
+        }
+        .kontakt-mini-label {
+          font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+          text-transform: uppercase;
+          font-size: 9px;
+          letter-spacing: 0.25em;
+          color: #555;
+          margin-bottom: 4px;
+          display: block;
+        }
+
+        /* ─── status pills ─── */
+        .kontakt-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+          font-size: 9px;
+          letter-spacing: 0.25em;
+          padding: 4px 10px;
+          border-radius: 999px;
+          border: 1px solid;
+        }
+        .kontakt-pill-live {
+          color: #4ade80;
+          border-color: rgba(74,222,128,.3);
+          background: rgba(74,222,128,.06);
+        }
+        .kontakt-pill-away {
+          color: #888;
+          border-color: rgba(255,255,255,.1);
+          background: rgba(255,255,255,.02);
+        }
+        .kontakt-pill-rec {
+          color: #ef4444;
+          border-color: rgba(239,68,68,.3);
+          background: rgba(239,68,68,.06);
+        }
+        .kontakt-pill-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 999px;
+          background: currentColor;
+          box-shadow: 0 0 8px currentColor;
+          animation: kontakt-pulse 1.6s ease-in-out infinite;
+        }
+        @keyframes kontakt-pulse {
+          0%, 100% { opacity: 0.4; transform: scale(0.9); }
+          50% { opacity: 1; transform: scale(1.05); }
+        }
+
+        /* ─── contact rows ─── */
+        .kontakt-contact {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          padding: 14px;
+          border: 1px solid rgba(139,92,246,.15);
+          border-radius: 10px;
+          background: rgba(139,92,246,.02);
+          text-decoration: none;
+          transition: all .4s cubic-bezier(.16,1,.3,1);
+        }
+        .kontakt-contact:hover {
+          border-color: rgba(139,92,246,.5);
+          background: rgba(139,92,246,.06);
+          transform: translateY(-1px);
+        }
+        .kontakt-contact-icon {
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid rgba(139,92,246,.25);
+          border-radius: 8px;
+          color: #8b5cf6;
+          flex-shrink: 0;
+          transition: all .4s ease;
+        }
+        .kontakt-contact:hover .kontakt-contact-icon {
+          background: rgba(139,92,246,.12);
+          border-color: #8b5cf6;
+          box-shadow: 0 0 16px rgba(139,92,246,.3);
+        }
+        .kontakt-arrow {
+          color: #444;
+          font-size: 16px;
+          display: inline-block;
+          transition: transform .4s cubic-bezier(.16,1,.3,1), color .4s;
+        }
+        .kontakt-contact:hover .kontakt-arrow {
+          color: #8b5cf6;
+          transform: translateX(4px);
+        }
+
+        /* ─── EEG monitor ─── */
+        .kontakt-eeg-wrap {
+          position: relative;
+          height: 120px;
+          background: #050505;
+          border: 1px solid rgba(139,92,246,.12);
+          border-radius: 8px;
+          overflow: hidden;
+        }
+        .kontakt-eeg-grid {
+          position: absolute;
+          inset: 0;
+          background-image:
+            linear-gradient(rgba(139,92,246,.07) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(139,92,246,.07) 1px, transparent 1px);
+          background-size: 20px 20px;
+          pointer-events: none;
+        }
+        .kontakt-eeg-track {
+          display: flex;
+          width: 200%;
+          height: 100%;
+          animation: kontakt-eeg-scroll 7s linear infinite;
+        }
+        .kontakt-eeg-svg {
+          width: 50%;
+          height: 100%;
+          display: block;
+          filter: drop-shadow(0 0 4px rgba(139,92,246,.7));
+        }
+        @keyframes kontakt-eeg-scroll {
+          from { transform: translateX(0); }
+          to { transform: translateX(-50%); }
+        }
+        .kontakt-eeg-fade {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          background:
+            linear-gradient(90deg, #050505 0%, transparent 8%, transparent 92%, #050505 100%);
+        }
+        .kontakt-eeg-scan {
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          width: 60px;
+          right: 18%;
+          background: linear-gradient(90deg, transparent, rgba(139,92,246,.18), transparent);
+          pointer-events: none;
+          mix-blend-mode: screen;
+          animation: kontakt-eeg-scan 3.5s ease-in-out infinite;
+        }
+        @keyframes kontakt-eeg-scan {
+          0%, 100% { opacity: 0.3; transform: translateX(-30px); }
+          50% { opacity: 0.7; transform: translateX(30px); }
+        }
+
+        /* ─── today highlight ─── */
+        .kontakt-today-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: #4ade80;
+          box-shadow: 0 0 8px #4ade80;
+          display: inline-block;
+          animation: kontakt-pulse 1.6s ease-in-out infinite;
+        }
+
+        /* ─── social cards ─── */
+        .kontakt-social-card {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 10px;
+          padding: 18px 16px;
+          border: 1px solid rgba(139,92,246,.15);
+          border-radius: 10px;
+          background: rgba(139,92,246,.02);
+          color: #aaa;
+          text-decoration: none;
+          position: relative;
+          overflow: hidden;
+          transition: all .4s cubic-bezier(.16,1,.3,1);
+        }
+        .kontakt-social-card::before {
+          content: '';
+          position: absolute;
+          inset: -1px;
+          background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(139,92,246,.18), transparent 40%);
+          opacity: 0;
+          transition: opacity .4s ease;
+          pointer-events: none;
+        }
+        .kontakt-social-card:hover {
+          border-color: #8b5cf6;
+          background: rgba(139,92,246,.08);
+          transform: translateY(-2px);
+          color: #fff;
+          box-shadow: 0 12px 30px -10px rgba(139,92,246,.3);
+        }
+        .kontakt-social-card:hover::before { opacity: 1; }
+        .kontakt-social-icon {
+          color: #8b5cf6;
+          display: inline-flex;
+          transition: transform .4s ease;
+        }
+        .kontakt-social-card:hover .kontakt-social-icon {
+          transform: scale(1.12) rotate(-4deg);
+        }
+        .kontakt-social-arrow {
+          position: absolute;
+          top: 14px;
+          right: 14px;
+          color: #444;
+          font-size: 14px;
+          transition: all .4s cubic-bezier(.16,1,.3,1);
+        }
+        .kontakt-social-card:hover .kontakt-social-arrow {
+          color: #8b5cf6;
+          transform: translate(2px, -2px);
         }
       `}</style>
     </main>
